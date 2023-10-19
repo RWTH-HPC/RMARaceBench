@@ -1,0 +1,28 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+
+{% block main %}
+
+
+
+    MPI_Win_fence(0, win);
+    if (rank == 0) {
+{%- if race %}
+        // CONFLICT
+        {{ op1.code }}
+        // CONFLICT
+        {{ op2.code }}
+{%- else %}
+        {{ op1.code }}
+        {{ op2.code }}
+{%- endif %}
+    }
+    MPI_Win_fence(0, win);
+    
+{% endblock main %}
+
+{% block epilogue %}
+{% endblock epilogue %}

@@ -1,0 +1,38 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","store"],
+    "RACE_PAIR": ["gaspi_read@{race_loc1}","STORE@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["gaspi_wait"],
+    "SYNC_CALLS": ["gaspi_allreduce"],
+    "NPROCS": 3,
+    "DESCRIPTION": "Two conflicting operations gaspi_read and a local store with missing synchronization."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+
+    if (rank == 0) {
+        gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
+        gaspi_wait(queue_id, GASPI_BLOCK);
+        printf("read result is %d\n", localbuf[0]);
+    }
+
+    if (rank == 1) {
+        remote_data[0] = 42;
+    }
+
+    int send = 1;
+    int recv;
+    gaspi_allreduce(&send, &recv, 1, GASPI_OP_SUM, sizeof(int), GASPI_GROUP_ALL, GASPI_BLOCK); // missing
+    printf("gaspi_allreduce result is %d\n", recv);
+
+{% endblock main %}

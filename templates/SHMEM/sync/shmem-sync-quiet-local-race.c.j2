@@ -1,0 +1,58 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+{%- if race %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "local",
+    "ACCESS_SET": ["local buffer write","load"],
+    "RACE_PAIR": ["shmem_int_get@{race_loc1}","LOAD@{race_loc2}"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["shmem_quiet"],
+    "SYNC_CALLS": ["shmem_barrier_all"],
+    "DESCRIPTION": "Two conflicting operations get_nbi and load which are not correctly separated by a shmem_quiet leading to a local race. The shmem_quiet should be in between the two conflicting operations to be correct."
+}
+*/
+// RACE LABELS END
+{%- else %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["local buffer write","load"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["shmem_quiet"],
+    "SYNC_CALLS": ["shmem_barrier_all"],
+    "DESCRIPTION": "Two conflicting operations get_nbi and load which are correctly separated by a shmem_quiet."
+}
+*/
+// RACE LABELS END
+{%- endif %}
+{%- endblock race_labels %}
+
+{% block main %}
+
+    shmem_barrier_all();
+
+    if( my_pe == 0 )
+    {
+        int source = 1;
+{% if race %}
+        // CONFLICT
+        shmem_int_get_nbi(&localbuf, &remote, 1, 1);
+        // CONFLICT
+        printf("localbuf is %d\n", localbuf);
+        shmem_quiet();
+{% else %}
+        shmem_int_get_nbi(&localbuf, &remote, 1, 1);
+        shmem_quiet();
+        printf("localbuf is %d\n", localbuf);
+{% endif %}
+    }
+
+    shmem_barrier_all();
+
+    printf( "PE %d: localbuf = %d, remote = %d, \n", my_pe, localbuf, remote );
+
+{% endblock main %}

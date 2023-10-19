@@ -1,0 +1,48 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","LOAD@{race_loc2}"],
+    "NPROCS": 3,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier","MPI_Send","MPI_Recv"],
+    "DESCRIPTION": "Two conflicting operations put and load which are not correctly synchronized due to wrong MPI_Send / MPI_Recv call order. Rank 1 synchronizes with rank 2 with a send/recv pair first, and only after the conflicting load access it synchronizes with rank 0."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        value = 1;
+        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
+        // CONFLICT
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win);
+        MPI_Send(&token, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+    }
+
+    if (rank == 1) {
+        MPI_Recv(&token, 1, MPI_INT, 2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // CONFLICT
+        printf("win_base[0] is %d\n", win_base[0]);
+        MPI_Recv(&token, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    if (rank == 2) {
+        MPI_Send(&token, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+    }
+    
+    
+
+{% endblock main %}
+

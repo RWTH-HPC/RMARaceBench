@@ -1,0 +1,5 @@
+*.exe
+*compiled*
+*.btr
+*.gpi2*
+.lit_test_times.txt

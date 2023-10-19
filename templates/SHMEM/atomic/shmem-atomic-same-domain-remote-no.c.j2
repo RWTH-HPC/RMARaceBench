@@ -1,0 +1,38 @@
+
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma atomic write","rma atomic write"],
+    "CONSISTENCY_CALLS": ["shmem_barrier_all"],
+    "SYNC_CALLS": ["shmem_barrier_all"],
+    "NPROCS": 3,
+    "DESCRIPTION": "Two concurrent conflicting atomic operations used on different context which are in the same atomicity domain."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block main %}
+    shmem_ctx_t ctx, ctx2;
+    shmem_ctx_create(0, &ctx);
+    shmem_ctx_create(0, &ctx2);
+
+    if (my_pe == 0)
+    {
+        // CONFLICT
+        shmem_ctx_int_atomic_add(ctx, &remote, 1, 1);
+    }
+
+    if (my_pe == 2)
+    {
+        // CONFLICT
+        shmem_ctx_int_atomic_add(ctx2, &remote, 1, 1);
+    }
+
+    shmem_barrier_all();
+
+{% endblock main %}

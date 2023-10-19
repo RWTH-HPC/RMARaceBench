@@ -1,0 +1,40 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{% block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma atomic write","rma atomic write"],
+    "RACE_PAIR": ["MPI_Accumulate@{race_loc1}","MPI_Accumulate@{race_loc2}"],
+    "NPROCS": 3,
+    "CONSISTENCY_CALLS": ["MPI_Win_fence"],
+    "SYNC_CALLS": ["MPI_Barrier", "MPI_Win_fence"],
+    "DESCRIPTION": "Two atomic operations acc and acc using different datatypes (short and int) such that there are no atomicity guarantees."
+}
+*/
+// RACE LABELS END
+{% endblock race_labels %}
+
+{% block main %}
+    
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    MPI_Win_fence(0, win);
+    if (rank == 0) {
+        short value1[4] = {1, 1, 1, 1};
+        // CONFLICT
+        MPI_Accumulate(value1, 4, MPI_SHORT, 1, 0, 4, MPI_SHORT, MPI_SUM, win);
+    }
+
+    if (rank == 2) {
+        int value2[4] = {1, 2, 3, 4};
+        // CONFLICT
+        MPI_Accumulate(value2, 4, MPI_INT, 1, 0, 4, MPI_INT, MPI_SUM, win);
+    }
+
+    MPI_Win_fence(0, win);
+    
+
+{% endblock main %}

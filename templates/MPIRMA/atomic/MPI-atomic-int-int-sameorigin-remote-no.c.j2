@@ -1,0 +1,33 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{% block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma atomic write","rma atomic write"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_fence"],
+    "SYNC_CALLS": ["MPI_Barrier", "MPI_Win_fence"],
+    "DESCRIPTION": "Two atomic operations acc and acc using the same datatypes such that there are atomicity guarantees."
+}
+*/
+// RACE LABELS END
+{% endblock race_labels %}
+
+{% block main %}
+    
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    MPI_Win_fence(0, win);
+    if (rank == 0) {
+        int value1[4] = {1, 1, 1, 1};
+        int value2[4] = {1, 2, 3, 4};
+        MPI_Accumulate(value1, 4, MPI_INT, 1, 0, 4, MPI_INT, MPI_SUM, win);
+        MPI_Accumulate(value2, 4, MPI_INT, 1, 0, 4, MPI_INT, MPI_SUM, win);
+    }
+    MPI_Win_fence(0, win);
+    
+
+{% endblock main %}

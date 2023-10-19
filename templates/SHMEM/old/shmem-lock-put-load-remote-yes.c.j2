@@ -1,0 +1,36 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+    static long lock;
+
+    shmem_barrier_all();
+
+    if( my_pe == 0 )
+    {
+        shmem_set_lock( &lock );
+        printf( "PE: %d in locked region.\n", my_pe );
+        shmem_clear_lock( &lock );
+
+        // CONFLICT
+        localbuf = 0;
+        shmem_int_put( &remote, &localbuf, 1, 0 );
+    }
+    else if( my_pe == 1 )
+    {
+        // CONFLICT
+        localbuf = 1;
+        shmem_int_put( &remote, &localbuf, 1, 0 );
+
+        shmem_set_lock( &lock );
+        printf( "PE: %d in locked region.\n", my_pe );
+        shmem_clear_lock( &lock );
+    }
+
+    shmem_barrier_all();
+
+    printf( "PE %d: localbuf = %d, remote = %d, \n", my_pe, localbuf, remote );
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","LOAD@{race_loc2}"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock_all","MPI_Win_unlock_all"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "DESCRIPTION": "Two conflicting operations put and load synchronized through lock_all and a barrier."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+
+{% block main %}
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Win_lock_all(0, win);
+
+    if (rank == 0) {
+        value = 1;
+        // CONFLICT
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+    }
+
+    MPI_Win_unlock_all(win);
+
+    if (rank == 1) {
+        // CONFLICT
+        printf("win_base[0] is %d\n", win_base[0]);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+
+    
+    
+
+{% endblock main %}
+

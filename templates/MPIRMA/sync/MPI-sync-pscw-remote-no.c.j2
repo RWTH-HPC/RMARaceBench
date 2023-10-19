@@ -1,0 +1,66 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma write","rma read"],
+    "NPROCS": 3,
+    "CONSISTENCY_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
+    "SYNC_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
+    "DESCRIPTION": "Two conflicting operations put and get which are synchronized correcly in PSCW mode."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+
+{% block main %}
+	int send_buf, recv_buf;
+	MPI_Status status;
+    MPI_Request request;
+    MPI_Info info;
+
+    MPI_Group world_group;
+    MPI_Comm_group(MPI_COMM_WORLD, &world_group);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        int destrank = 2;
+        MPI_Group destgroup;
+        MPI_Group_incl(world_group, 1, &destrank, &destgroup);
+
+        MPI_Win_start(destgroup, 0, win);
+        int value = 42;
+        MPI_Put(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
+        MPI_Win_complete(win);
+    }
+    else if (rank == 1) {
+        int destrank = 2;
+        MPI_Group destgroup;
+        MPI_Group_incl(world_group, 1, &destrank, &destgroup);
+        MPI_Win_start(destgroup, 0, win);
+        int value;
+        MPI_Get(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
+        MPI_Win_complete(win);
+
+    } else if (rank == 2) {
+        int srcrank0 = 0;
+        MPI_Group srcgroup0;
+        MPI_Group_incl(world_group, 1, &srcrank0, &srcgroup0);
+
+        int srcrank1 = 1;
+        MPI_Group srcgroup1;
+        MPI_Group_incl(world_group, 1, &srcrank1, &srcgroup1);
+
+        MPI_Win_post(srcgroup0, 0, win);
+        MPI_Win_wait(win);
+
+        MPI_Win_post(srcgroup1, 0, win);
+        MPI_Win_wait(win);
+    }
+
+    
+{% endblock main %}

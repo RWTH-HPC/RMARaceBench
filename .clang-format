@@ -1,0 +1,35 @@
+---
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 120
+StatementMacros: ["mGET_INSTANCE_FUNCTION", "mFREE_INSTANCE_FUNCTION", "mPNMPI_REGISTRATIONPOINT_FUNCTION"]
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#breakbeforebraces
+BreakBeforeBraces: Linux
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#alwaysbreaktemplatedeclarations
+AlwaysBreakTemplateDeclarations: Yes
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#binpackarguments
+BinPackArguments: false
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#binpackparameters
+BinPackParameters: false
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#allowallargumentsonnextline
+AllowAllArgumentsOnNextLine: false
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#allowallparametersofdeclarationonnextline
+AllowAllParametersOfDeclarationOnNextLine: false
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#alignafteropenbracket
+AlignAfterOpenBracket: AlwaysBreak
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#pointeralignment
+PointerAlignment: Left
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#sortincludes
+SortIncludes: Never
+
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html#reflowcomments
+ReflowComments: false

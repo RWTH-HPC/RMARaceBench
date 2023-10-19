@@ -1,0 +1,43 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "local",
+    "ACCESS_SET": ["local buffer read","local buffer write"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","MPI_Get@{race_loc2}"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock,MPI_Win_flush_local"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "DESCRIPTION": "Two conflicting operations put and get issued from the same origin where MPI_Win_flush_local is not enough to ensure consistency."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        value = 1;
+        MPI_Win_lock(MPI_LOCK_SHARED, 1, 0, win);
+        // CONFLICT
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_flush_local(1, win);
+        // CONFLICT
+        MPI_Get(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win); // consistent
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD); // synchronized
+    
+    
+
+{% endblock main %}
+

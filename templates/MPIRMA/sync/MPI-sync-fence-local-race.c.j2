@@ -1,0 +1,62 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+{%- if race %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "local",
+    "ACCESS_SET": ["local buffer write","load"],
+    "RACE_PAIR": ["MPI_Get@{race_loc1}","LOAD@{race_loc2}"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_fence"],
+    "SYNC_CALLS": ["MPI_Win_fence"],
+    "DESCRIPTION": "Two conflicting operations get and get which are not synchronized correcly with an MPI_Win_fence leading to a local race."
+}
+*/
+// RACE LABELS END
+{%- else %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["local buffer write","load"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock_all,MPI_Win_unlock_all,MPI_Win_flush_local_all"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "DESCRIPTION": "Two conflicting operations get and get which are synchronized correctly with an MPI_Win_fence leading to a local race."
+}
+*/
+// RACE LABELS END
+{%- endif %}
+{%- endblock race_labels %}
+
+
+{% block main %}
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    MPI_Win_fence(0, win);
+    if (rank == 0) {
+{%- if race %}
+        /* conflicting put and store */
+        // CONFLICT
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        // CONFLICT
+        value = 42;
+{%- else %}
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+{% endif %}
+    }
+{%- if not race %}
+    MPI_Win_fence(0, win);
+    if (rank == 0) {
+        printf("value is %d\n", value);
+    }
+{% endif %}
+    MPI_Win_fence(0, win);
+    
+    
+{% endblock main %}
+

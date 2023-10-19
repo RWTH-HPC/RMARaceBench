@@ -1,0 +1,52 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "CONSISTENCY_CALLS": ["MPI_Win_lock","MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations MPI_Put and a local load at process 1. Since the iterations of the loop are ordered by the OpenMP ordered clause, the conflicting operations do not result in a race."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
+        value = 42;
+        // CONFLICT
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win);
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+
+    if (rank == 1) {
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp for ordered
+            for (int i = 0; i < 2; ++i) {
+                #pragma omp ordered
+                if (i == 0) {
+                    MPI_Barrier(MPI_COMM_WORLD);
+                } else {
+                    // CONFLICT
+                    printf("win_base[0] is %d\n", win_base[0]);
+                }
+            }
+        }
+    }
+    
+
+{% endblock main %}

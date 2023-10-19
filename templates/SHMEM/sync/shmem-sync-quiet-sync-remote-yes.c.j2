@@ -1,0 +1,42 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{% block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","rma read"],
+    "RACE_PAIR": ["shmem_int_put@{race_loc1}","shmem_int_get@{race_loc2}"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["shmem_quiet"],
+    "SYNC_CALLS": ["shmem_barrier_all"],
+    "DESCRIPTION": "Two conflicting operations put and get where a missing process synchronization call between them leads to a race. Calling shmem_quiet is not sufficient here."
+}
+*/
+// RACE LABELS END
+{% endblock race_labels %}
+
+{% block main %}
+
+    shmem_barrier_all();
+
+    if( my_pe == 0 )
+    {
+        int myval = 42;
+        // CONFLICT
+        shmem_int_put(&remote, &myval, 1, 0);
+    }
+
+    shmem_quiet();
+
+    if( my_pe == 1 )
+    {
+        // CONFLICT
+        shmem_int_get(&localbuf, &remote, 1, 0);
+    }
+
+    shmem_barrier_all();
+
+    printf( "PE %d: localbuf = %d, remote = %d, \n", my_pe, localbuf, remote );
+
+{% endblock main %}

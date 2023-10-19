@@ -1,0 +1,67 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+{%- if race %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","LOAD@{race_loc2}"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier,MPI_Send,MPI_Recv"],
+    "DESCRIPTION": "Two conflicting operations put and load which are not synchronized correcly with MPI_Send / MPI_Recv."
+}
+*/
+// RACE LABELS END
+{%- else %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma write","load"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock,MPI_Win_flush"],
+    "SYNC_CALLS": ["MPI_Barrier,MPI_Send,MPI_Recv"],
+    "DESCRIPTION": "Two conflicting operations put and load which are correctly synchronized with MPI_Send / MPI_Recv calls."
+}
+*/
+// RACE LABELS END
+{%- endif %}
+{%- endblock race_labels %}
+
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        value = 1;
+        MPI_Win_lock(MPI_LOCK_SHARED, 1, 0, win);
+{%- if race %}
+        // CONFLICT
+{%- endif %}
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win);
+
+        MPI_Send(&token, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+    }
+
+    if (rank == 1) {
+{%- if race %}
+        // CONFLICT
+        printf("win_base[0] is %d\n", win_base[0]);
+        MPI_Recv(&token, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+{%- else %}
+        MPI_Recv(&token, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("win_base[0] is %d\n", win_base[0]);
+{%- endif %}
+    }
+    
+    
+
+{% endblock main %}
+

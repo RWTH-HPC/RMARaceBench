@@ -1,0 +1,40 @@
+
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma atomic write","rma atomic write"],
+    "RACE_PAIR": ["shmem_ctx_int_atomic_add@{race_loc1}","shmem_ctx_int_atomic_add@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["shmem_barrier_all"],
+    "SYNC_CALLS": ["shmem_barrier_all"],
+    "NPROCS": 3,
+    "DESCRIPTION": "Two concurrent conflicting atomic operations used on different context in different atomicity domains, no atomicity guarantees."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block main %}
+    shmem_ctx_t ctx_world;
+    shmem_ctx_t ctx_shared;
+    shmem_team_create_ctx(SHMEM_TEAM_WORLD, 0, &ctx_world);
+    shmem_team_create_ctx(SHMEM_TEAM_SHARED, 0, &ctx_shared);
+
+    if (my_pe == 0)
+    {
+        // CONFLICT
+        shmem_ctx_int_atomic_add(ctx_world, &remote, 1, 1);
+    }
+    
+    if (my_pe == 2)
+    {
+        // CONFLICT
+        shmem_ctx_int_atomic_add(ctx_shared, &remote, 1, shmem_team_translate_pe(SHMEM_TEAM_WORLD, 1, SHMEM_TEAM_SHARED));
+    }
+
+    shmem_barrier_all();
+
+{% endblock main %}

@@ -1,0 +1,45 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "CONSISTENCY_CALLS": ["shmem_quiet"],
+    "SYNC_CALLS": ["shmem_sync_all"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations shmem_put_nbi and a local load at process 1. Since the setions are in seperate constructs they are not run in parallel and therefore all threads of the processes synchronize using the barrier."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+
+    if (my_pe == 0) {
+        shmem_put_nbi(&remote, &localbuf, 1, 1);
+        shmem_quiet();
+        shmem_sync_all();
+    }
+
+    if (my_pe == 1) {
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp sections
+            {
+                #pragma omp section
+                shmem_sync_all();
+            }
+
+            #pragma omp sections
+            {
+                #pragma omp section
+                printf("remote is %d\n", remote);
+            }
+        }
+    }
+
+{% endblock main %}

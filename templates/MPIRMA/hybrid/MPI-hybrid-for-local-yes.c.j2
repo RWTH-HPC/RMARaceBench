@@ -1,0 +1,56 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "local",
+    "ACCESS_SET": ["rma read","load"],
+    "RACE_PAIR": ["MPI_Get@{race_loc1}","LOAD@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["MPI_Win_lock","MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations MPI_Get and a local load with missing synchronization at process 0. Since the iterations of the loop can be scheduled arbitrarily, the local load and MPI_Get are concurrent, resulting in a local race."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp for schedule(static, 1)
+            for(int i = 0; i < 2; ++i)
+            {
+                if(i == 0) {
+                    MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
+                    // CONFLICT
+                    MPI_Get(&win_base[0], 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+                    MPI_Win_unlock(1, win);
+                } else {
+                    // CONFLICT
+                    printf("win_base[0] is %d\n", win_base[0]);
+                }
+            }
+            
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+
+    if (rank == 1) {
+        MPI_Barrier(MPI_COMM_WORLD);
+        printf("win_base[0] is %d\n", win_base[0]);
+    }
+
+    
+
+{% endblock main %}

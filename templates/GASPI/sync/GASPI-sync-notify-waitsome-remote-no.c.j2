@@ -1,0 +1,35 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma write","load"],
+    "CONSISTENCY_CALLS": ["gaspi_wait"],
+    "SYNC_CALLS": ["gaspi_notify_waitsome"],
+    "NPROCS": 2,
+    "DESCRIPTION": "gaspi_write_notify is synchronized using gaspi_notify_waitsome before local load."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+    gaspi_notification_id_t firstId;
+
+    if (rank == 0) {
+        gaspi_write_notify(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), 0, 1, queue_id, GASPI_BLOCK);
+        gaspi_wait(queue_id, GASPI_BLOCK);
+    }         
+
+    if (rank == 1) {
+        gaspi_notification_id_t firstId;
+        gaspi_notify_waitsome(remote_seg_id, 0, 1, &firstId, GASPI_BLOCK);
+
+        printf("remote_data[0] is %d\n", remote_data[0]);
+    }
+
+{% endblock main %}

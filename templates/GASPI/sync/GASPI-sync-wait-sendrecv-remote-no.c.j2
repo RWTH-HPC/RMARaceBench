@@ -1,0 +1,36 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma read","store"],
+    "CONSISTENCY_CALLS": ["gaspi_wait"],
+    "SYNC_CALLS": ["gaspi_passive_send,gaspi_passive_receive"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations gaspi_read and a local store with correct synchronization."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+
+    if (rank == 0) {
+        gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
+        gaspi_wait(queue_id, GASPI_BLOCK);
+        printf("read result is %d\n", localbuf[0]);
+        gaspi_passive_send(loc_seg_id, 0, 1, 4, GASPI_BLOCK);
+    }
+
+    if (rank == 1) {
+        gaspi_rank_t source_rank;
+        gaspi_passive_receive(loc_seg_id, 0, &source_rank, 4, GASPI_BLOCK);
+        printf("received data from %d is %d\n", source_rank, localbuf[0]);
+        remote_data[0] = 42;
+    }
+
+{% endblock main %}

@@ -1,0 +1,79 @@
+/* Part of RMARaceBench, under BSD-3-Clause License
+ * See https://github.com/RWTH-HPC/RMARaceBench/LICENSE for license information.
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+{% block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+{%- if race %}
+    "RACE_KIND": "{{access_kind}}",
+{%- else %}
+    "RACE_KIND": "none",
+{%- endif -%}
+{%- if access_kind == 'local' %}
+    "ACCESS_SET": ["{{op1.local_opkind}}","{{op2.local_opkind}}"],
+{%- elif access_kind == 'remote' %}
+    "ACCESS_SET": ["{{op1.remote_opkind}}","{{op2.remote_opkind}}"],
+{%- endif -%}
+{%- if race %}
+    "RACE_PAIR": ["{{op1.callname}}@{race_loc1}","{{op2.callname}}@{race_loc2}"],
+    "NPROCS": {{nprocs}},
+    "DESCRIPTION": "Two conflicting operations {{op1.name}} and {{op2.name}} executed concurrently which leads to a race."
+{%- else %}
+    "NPROCS": {{nprocs}},
+    "DESCRIPTION": "Two non-conflicting operations {{op1.name}} and {{op2.name}} executed concurrently with no race."
+{%- endif %}
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+{%- block preamble %}
+{% endblock preamble%}
+
+#include <shmem.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+{%- block additional_declarations %}
+{% endblock additional_declarations %}
+
+
+#define PROC_NUM {{ nprocs }}
+
+int
+main( int argc, char** argv )
+{
+    static int remote = 0;
+    static int remote2 = 0;
+    int        localbuf = 1;
+    {%- if op1 %}
+    {{- op1.additional_declarations }}
+    {%- endif %}
+    {%- if op2 %}
+    {{- op2.additional_declarations }}
+    {%- endif %}
+
+    shmem_init();
+
+    int num_pe = shmem_n_pes();
+    int my_pe  = shmem_my_pe();
+
+    if (num_pe != PROC_NUM) {
+        printf("Got %d PEs, expected %d\n", num_pe, PROC_NUM);
+        shmem_global_exit( 1 );
+    }
+
+    {%- block main %}
+    {% endblock main %}
+
+    shmem_barrier_all();
+    printf("Process %d: Execution finished, variable contents: remote = %d, localbuf = %d\n", my_pe, remote, localbuf);
+    shmem_finalize();
+    
+    return 0;
+}
+
+{% block epilogue %}
+{% endblock epilogue %}

@@ -1,0 +1,42 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","rma write"],
+    "RACE_PAIR": ["shmem_int_sum_reduce@{race_loc1}","shmem_int_put@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["shmem_quiet"],
+    "SYNC_CALLS": ["shmem_barrier_all"],
+    "NPROCS": 4,
+    "DESCRIPTION": "Two conflicting operations shmem_int_sum_reduce and shmem_int_put without synchronization."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+    localbuf = 1;
+    static int reduced = 0;
+    static int source = 1;
+
+    shmem_barrier_all();
+
+    // CONFLICT
+    shmem_int_sum_reduce( SHMEM_TEAM_WORLD, &reduced, &source, 1 );
+
+    if( my_pe == 0 )
+    {
+        int localbuf = 0;
+        // CONFLICT
+        shmem_int_put( &reduced, &localbuf, 1, 1 );
+    }
+
+    shmem_barrier_all();
+
+    printf( "PE %d: %d\n", my_pe, reduced );
+
+{% endblock main %}

@@ -1,0 +1,73 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","LOAD@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["MPI_Win_lock","MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations MPI_Put and a local load with missing synchronization at process 1. Since there is no taskwait, local load and MPI_Barrier are concurrent, resulting in a remote race."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block additional_declarations %}
+#include <unistd.h>
+
+void my_signal(int *s) {
+    #pragma omp atomic
+    (*s)++;
+}
+
+void my_wait(int* s, int v) {
+    int wait = 0;
+    do {
+        usleep(10);
+        #pragma omp atomic read
+        wait = (*s);
+    } while (wait < v);
+}
+{% endblock additional_declarations  %}
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
+        value = 42;
+        // CONFLICT
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win);
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+
+    if (rank == 1) {
+        int flag = 0;
+        #pragma omp parallel num_threads(2) shared(flag)
+        {
+            #pragma omp single
+            {
+                #pragma omp task shared(flag)
+                {
+                    my_signal(&flag);
+                    MPI_Barrier(MPI_COMM_WORLD);
+                }
+
+                // make execution of task on another thread probable by waiting for signal of task
+                my_wait(&flag, 1);
+                // CONFLICT
+                printf("win_base[0] is %d\n", win_base[0]);
+            }
+        }
+    }
+    
+
+{% endblock main %}

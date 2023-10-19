@@ -1,0 +1,32 @@
+
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma atomic write","rma read"],
+    "CONSISTENCY_CALLS": ["shmem_barrier_all"],
+    "SYNC_CALLS": ["shmem_barrier_all"],
+    "NPROCS": 3,
+    "DESCRIPTION": "Two concurrent atomic operations."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block main %}
+    if(my_pe == 0)
+    {
+        shmem_int_atomic_add(&remote, 1, 1);
+    }
+
+    if(my_pe == 2)
+    {
+        shmem_int_atomic_add(&remote, 1, 1);
+    }
+
+    shmem_barrier_all();
+
+{% endblock main %}

@@ -1,0 +1,39 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{% block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma read","rma write"],
+    "RACE_PAIR": ["shmem_int_get@{race_loc1}","shmem_int_put@{race_loc2}"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["shmem_fence"],
+    "SYNC_CALLS": ["shmem_barrier_all"],
+    "DESCRIPTION": "Two conflicting operations get_nbi and put that are not ordered via shmem_fence."
+}
+*/
+// RACE LABELS END
+{% endblock race_labels %}
+
+{% block main %}
+
+    shmem_barrier_all();
+
+    if( my_pe == 0 )
+    {
+        // CONFLICT
+        shmem_int_get_nbi( &localbuf, &remote, 1, 0 );
+
+        shmem_fence(); // Doesn't order "RMA loads" (e.g. non-blocking get or atomic fetch)
+
+        int localbuf2 = 42;
+        // CONFLICT
+        shmem_int_put( &remote, &localbuf2, 1, 0 );
+    }
+
+    shmem_barrier_all();
+
+    printf( "PE %d: localbuf = %d, remote = %d, \n", my_pe, localbuf, remote );
+
+{% endblock main %}

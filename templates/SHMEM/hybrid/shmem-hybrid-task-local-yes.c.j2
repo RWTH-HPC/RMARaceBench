@@ -1,0 +1,71 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "local",
+    "ACCESS_SET": ["rma read","load"],
+    "RACE_PAIR": ["shmem_get_nbi@{race_loc1}","LOAD@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["shmem_quiet"],
+    "SYNC_CALLS": ["shmem_sync_all"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations shmem_get_nbi and a local load with missing synchronization at process 0. Since there is no taskwait, local load and access epoch of the shmem_get_nbi are concurrent, resulting in a local buffer race."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block additional_declarations %}
+#include <unistd.h>
+
+void my_signal(int *s) {
+    #pragma omp atomic
+    (*s)++;
+}
+
+void my_wait(int* s, int v) {
+    int wait = 0;
+    do {
+        usleep(10);
+        #pragma omp atomic read
+        wait = (*s);
+    } while (wait < v);
+}
+{% endblock additional_declarations  %}
+
+{% block main %}
+
+    if (my_pe == 0) {
+        int flag = 0;
+        #pragma omp parallel num_threads(2) shared(flag)
+        {
+            #pragma omp single
+            {
+                #pragma omp task shared(flag)
+                {
+                    my_signal(&flag);
+                    // CONFLICT
+                    shmem_get_nbi(&localbuf, &remote, 1, 1);
+                    shmem_quiet();
+                }
+
+                // make execution of task on another thread probable by waiting for signal of task
+                my_wait(&flag, 1);
+                // CONFLICT
+                printf("localbuf is %d\n", localbuf);
+            }
+        }
+        shmem_sync_all();
+    }
+
+    if (my_pe == 1) {
+        shmem_sync_all();
+        printf("remote is %d\n", remote);
+    }
+
+
+{% endblock main %}

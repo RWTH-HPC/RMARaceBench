@@ -1,0 +1,53 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","LOAD@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["MPI_Win_lock","MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations MPI_Get and a local load with missing synchronization, because only the other thread at the origin synchronizes with the target."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp sections
+            {
+                #pragma omp section
+                {
+                    int value = 42;
+                    MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
+                    // CONFLICT
+                    MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win); // Put on win_base[0] at process 1
+                    MPI_Win_unlock(1, win);
+                }
+            
+                #pragma omp section
+                {
+                    sleep(1); // force that MPI_Put goes through first
+                    MPI_Barrier(MPI_COMM_WORLD);
+                }
+            }
+        }
+    }
+
+    if (rank == 1) {
+        MPI_Barrier(MPI_COMM_WORLD);
+        // CONFLICT
+        printf("win_base[0] is %d\n", win_base[0]);
+    }
+{% endblock main %}

@@ -1,0 +1,41 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{% block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma write","rma write"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["shmem_set_lock,shmem_clear_lock"],
+    "SYNC_CALLS": ["shmem_set_lock,shmem_clear_lock,shmem_barrier_all"],
+    "DESCRIPTION": "Two conflicting operations put and put ordered by shmem locks."
+}
+*/
+// RACE LABELS END
+{% endblock race_labels %}
+
+{% block main %}
+    static long lock;
+
+    shmem_barrier_all();
+
+    if (my_pe == 0) {
+        localbuf = 42;
+        shmem_set_lock( &lock );
+        shmem_int_put( &remote, &localbuf, 1, 1 );
+        shmem_clear_lock( &lock );
+    }
+
+    if (my_pe == 1) {
+        localbuf = 1337;
+        shmem_set_lock( &lock );
+        shmem_int_put( &remote, &localbuf, 1, 1 );
+        shmem_clear_lock( &lock );
+    }
+
+    shmem_barrier_all();
+
+    printf( "PE %d: localbuf = %d, remote = %d, \n", my_pe, localbuf, remote );
+
+{% endblock %}

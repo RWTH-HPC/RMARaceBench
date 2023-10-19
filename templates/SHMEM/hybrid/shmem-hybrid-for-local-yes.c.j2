@@ -1,0 +1,50 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "local",
+    "ACCESS_SET": ["rma read","load"],
+    "RACE_PAIR": ["shmem_get_nbi@{race_loc1}","LOAD@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["shmem_quiet"],
+    "SYNC_CALLS": ["shmem_sync_all"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations shmem_get_nbi and a local load with missing synchronization at process 0. Since the iterations of the loop can be scheduled arbitrarily, the local load and shmem_get_nbi are concurrent, resulting in a local race."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+
+    if (my_pe == 0) {
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp for schedule(static, 1)
+            for(int i = 0; i < 2; ++i)
+            {
+                if(i == 0) {
+                    // CONFLICT
+                    shmem_get_nbi(&localbuf, &remote, 1, 1);
+                    shmem_quiet();
+                } else {
+                    // CONFLICT
+                    printf("localbuf is %d\n", localbuf);
+                }
+            }
+            
+        }
+        shmem_sync_all();
+    }
+
+    if (my_pe == 1) {
+        shmem_sync_all();
+        printf("remote is %d\n", remote);
+    }
+
+
+{% endblock main %}

@@ -1,0 +1,50 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["shmem_int_put@{race_loc1}","LOAD@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["shmem_quiet"],
+    "SYNC_CALLS": ["shmem_team_sync"],
+    "NPROCS": 4,
+    "DESCRIPTION": "PE 2 part of the team puts to PE 3 which is *not* part of the team. There is no synchronization between PE 2 and PE3, since they are not in the same team."
+}
+*/
+// RACE LABELS END
+
+{%- endblock race_labels %}
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+    shmem_team_t team = SHMEM_TEAM_INVALID;
+    shmem_team_split_strided( SHMEM_TEAM_WORLD, 0, 2, num_pe / 2, NULL, 0lu, &team );
+
+    shmem_barrier_all();
+
+    if( SHMEM_TEAM_INVALID != team )
+    {
+        if (my_pe == 2)
+        {
+            localbuf = 42;
+            // CONFLICT
+            shmem_int_put( &remote, &localbuf, 1, 3 ); // P2 puts to P3
+        }
+        shmem_quiet(); // Synchronisation
+    }
+
+    if( SHMEM_TEAM_INVALID != team )
+        shmem_team_sync( team ); // Synchronisation
+
+    if( SHMEM_TEAM_INVALID == team )
+    {
+        if (my_pe == 3)
+            // CONFLICT
+            printf( "PE %d: %d\n", my_pe, remote );
+    }
+
+    shmem_barrier_all();
+{% endblock main %}

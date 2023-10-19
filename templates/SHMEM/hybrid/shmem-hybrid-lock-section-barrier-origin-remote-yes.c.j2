@@ -1,0 +1,52 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["shmem_put@{race_loc1}","LOAD@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["shmem_quiet"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations shmem_put and a local load with missing synchronization, because only the other thread at the origin synchronizes with the target."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+    shmem_barrier_all();
+
+    if (my_pe == 0) {
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp sections
+            {
+                #pragma omp section
+                {
+                    int value = 42;
+                    // CONFLICT
+                    shmem_int_put(&remote, &value, 1, 1); // Put on win_base[0] at process 1
+                    shmem_quiet();
+                }
+
+                #pragma omp section
+                {
+                    sleep(1); // force that shmem_put goes through first
+                    shmem_sync_all();
+                }
+            }
+        }
+    }
+
+    if (my_pe == 1) {
+        shmem_sync_all();
+        // CONFLICT
+        printf("remote is %d\n", remote);
+    }
+{% endblock main %}

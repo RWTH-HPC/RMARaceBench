@@ -1,0 +1,40 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma write","rma read"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock,MPI_Win_flush"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "DESCRIPTION": "Two conflicting operations put and get issued from the same origin where consistency between them is ensured with MPI_Win_flush and synchronization is due to program order."
+}
+*/
+// RACE LABELS END
+
+{%- endblock race_labels %}
+
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        value = 1;
+        MPI_Win_lock(MPI_LOCK_SHARED, 1, 0, win);
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_flush(1, win);
+        MPI_Get(&value2, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win); // consistent
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD); // synchronized
+    
+    
+
+{% endblock main %}
+

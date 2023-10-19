@@ -1,0 +1,50 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","rma read"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","MPI_Get@{race_loc2}"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "DESCRIPTION": "Two conflicting operations put and get issued from the same origin with no consistency between them."
+}
+*/
+// RACE LABELS END
+
+{%- endblock race_labels %}
+
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        value = 1;
+        MPI_Win_lock(MPI_LOCK_SHARED, 1, 0, win);
+        // CONFLICT
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        // CONFLICT
+        MPI_Get(&value2, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win); // consistent
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD); // synchronized
+
+{%- if op1.name == 'put' or op2.name == 'put' %}
+    if (rank == 1) {
+        printf("win_base[0] is %d\n", win_base[0]);
+    }
+{% endif %}
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+    
+
+{% endblock main %}
+

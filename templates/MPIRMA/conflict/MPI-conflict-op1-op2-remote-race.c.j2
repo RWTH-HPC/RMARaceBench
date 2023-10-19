@@ -1,0 +1,38 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+
+{% block main %}
+
+
+
+    MPI_Win_fence(0, win);
+
+    if (rank == 0) {
+        {%- if race %}
+        /* conflicting {{ op1.name }} and {{ op2.name }} */
+        // CONFLICT
+        {%- endif %}
+        {{ op1.code }}
+    }
+
+{% if op1.name in ['store', 'load'] or op2.name in ['store', 'load'] %}
+    if (rank == 1) {
+{%- else %}
+    if (rank == 2) {
+{%- if op2.name != 'get' %}
+        value = 2;
+{%- endif %}
+{%- endif %}
+        {%- if race %}
+        // CONFLICT
+        {%- endif %}
+        {{ op2.code }}
+    }
+
+    MPI_Win_fence(0, win);
+
+    
+{% endblock main %}

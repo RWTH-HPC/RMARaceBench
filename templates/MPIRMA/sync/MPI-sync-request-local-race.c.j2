@@ -1,0 +1,60 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block preamble %}
+{%- if race %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "local",
+    "ACCESS_SET": ["local buffer write","load"],
+    "RACE_PAIR": ["MPI_Rget@{race_loc1}","LOAD@{race_loc2}"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
+    "SYNC_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
+    "DESCRIPTION": "Two conflicting operations rget and load as request-based operations that are not synchronized correctly with MPI_Wait."
+}
+*/
+// RACE LABELS END
+{%- else %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["local buffer write","load"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Wait"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "DESCRIPTION": "Two conflicting operations rget and load as request-based operations that are synchronized correctly with MPI_Wait."
+}
+*/
+// RACE LABELS END
+{%- endif %}
+{%- endblock preamble %}
+
+{% block main %}
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    MPI_Win_fence(0, win);
+    if (rank == 0) {
+        MPI_Request req;
+{%- if race %}
+        // CONFLICT
+        MPI_Rget(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win, &req);
+        // CONFLICT
+        printf("value is %d\n", value);
+        MPI_Wait(&req, MPI_STATUS_IGNORE);
+{% else %}
+        MPI_Rget(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win, &req);
+        MPI_Wait(&req, MPI_STATUS_IGNORE);
+        printf("value is %d\n", value);
+{% endif %}
+    }
+
+    MPI_Win_fence(0, win);
+    
+    
+
+{% endblock main %}
+

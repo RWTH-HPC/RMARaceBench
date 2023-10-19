@@ -1,0 +1,50 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma write","rma write"],
+    "NPROCS": 3,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier","MPI_Send","MPI_Recv"],
+    "DESCRIPTION": "Two conflicting operations put and put which are correctly synchronized with MPI_Send / MPI_Recv calls. Target rank 1 does no calls in terms of consistency or synchronization calls."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        value = 1;
+        MPI_Win_lock(MPI_LOCK_SHARED, 1, 0, win);
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win);
+        // sync with rank 2
+        MPI_Send(&token, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
+    }
+
+    if (rank == 1) {
+        // does nothing
+    }
+
+    if (rank == 2) {
+        // sync with rank 0
+        MPI_Recv(&token, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        value = 1;
+        MPI_Win_lock(MPI_LOCK_SHARED, 1, 0, win);
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win);
+    }
+    
+    
+
+{% endblock main %}
+

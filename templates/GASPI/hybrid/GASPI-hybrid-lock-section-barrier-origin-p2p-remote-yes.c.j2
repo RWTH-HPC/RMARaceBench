@@ -1,0 +1,55 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["gaspi_read@{race_loc1}","STORE@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["gaspi_wait"],
+    "SYNC_CALLS": ["gaspi_barrier"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations gaspi_read and a local store with missing synchronization, because only the other thread at the origin synchronizes with the target."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+    gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+
+    if (rank == 0) {
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp sections
+            {
+                #pragma omp section
+                {
+                    // CONFLICT
+                    gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
+                    gaspi_wait(queue_id, GASPI_BLOCK);
+                }
+
+                #pragma omp section
+                {
+                    sleep(1); // force that gaspi_read goes through first
+                    gaspi_passive_send(loc_seg_id, 0, 1, 4, GASPI_BLOCK);
+                }
+            }
+        }
+    }
+
+    if (rank == 1) {
+        {
+            gaspi_rank_t source_rank;
+            gaspi_passive_receive(loc_seg_id, 0, &source_rank, 4, GASPI_BLOCK);
+            printf("received data from %d is %d\n", source_rank, localbuf[0]);
+        }
+        // CONFLICT
+        remote_data[0] = 42;
+    }
+{% endblock main %}

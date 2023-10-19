@@ -1,0 +1,28 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+    shmem_barrier_all();
+
+    if( my_pe == 0 )
+    {
+{%- if race %}
+        // CONFLICT
+        {{ op1.code }}
+        // CONFLICT
+        {{ op2.code }}
+{%- else %}
+        {{ op1.code }}
+        {{ op2.code }}
+{%- endif %}
+    }
+
+    shmem_barrier_all();
+
+    printf( "PE %d: localbuf = %d, remote = %d, \n", my_pe, localbuf, remote );
+
+{% endblock main %}
+
+// 

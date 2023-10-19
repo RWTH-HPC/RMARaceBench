@@ -1,0 +1,41 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma atomic write","rma atomic write"],
+    "CONSISTENCY_CALLS": [""],
+    "SYNC_CALLS": ["gaspi_barrier"],
+    "NPROCS": 3,
+    "DESCRIPTION": "Two atomic operations gaspi_atomic_fetch_add with unaligned offets. The gaspi_atomic_fetch_add call from rank 0 correctly adds an offset of sizeof(gaspi_atomic_value_t) bytes."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+    gaspi_atomic_value_t old;
+
+    if (rank == 0) {
+        // CONFLICT
+        gaspi_atomic_fetch_add(remote_seg_id, sizeof(gaspi_atomic_value_t), 1, 1, &old, GASPI_BLOCK);
+        printf("rank 0 old value = %lu\n", old);
+    } 
+
+    if (rank == 2) {
+        // CONFLICT
+        gaspi_atomic_fetch_add(remote_seg_id, 0, 1, 1, &old, GASPI_BLOCK);
+        printf("rank 2 old value = %lu\n", old);
+    }
+
+    gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+
+    if (rank == 1) {
+        printf("rank 1 value = %lu\n", ((gaspi_atomic_value_t*) remote_data)[0]);
+    }
+
+{% endblock main %}

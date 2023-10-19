@@ -1,0 +1,42 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "CONSISTENCY_CALLS": ["gaspi_wait"],
+    "SYNC_CALLS": ["gaspi_barrier"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations gaspi_read and a local load with synchronization at process 0. The OpenMP barrier enforces that all threads of the target synchronize with the origin."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+
+    if (rank == 0) {
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp single
+            {
+                gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
+                gaspi_wait(queue_id, GASPI_BLOCK);
+            }
+            #pragma omp barrier
+            printf("localbuf[0] is %d\n", localbuf[0]);
+        }
+        gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+    }
+
+    if (rank == 1) {
+        gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+        printf("remote_data[0] is %d\n", remote_data[0]);
+    }
+
+
+{% endblock main %}

@@ -1,0 +1,66 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "CONSISTENCY_CALLS": ["gaspi_wait"],
+    "SYNC_CALLS": ["gaspi_barrier"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations gaspi_read and a local store at process 1. Since the tasks are separated by a taskwait construct, the local store must occur after the barrier."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block additional_declarations %}
+#include <unistd.h>
+
+void my_signal(int *s) {
+    #pragma omp atomic
+    (*s)++;
+}
+
+void my_wait(int* s, int v) {
+    int wait = 0;
+    do {
+        usleep(10);
+        #pragma omp atomic read
+        wait = (*s);
+    } while (wait < v);
+}
+{% endblock additional_declarations  %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+
+    if (rank == 0) {
+        gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
+        gaspi_wait(queue_id, GASPI_BLOCK);
+        gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+    }
+
+    if (rank == 1) {
+        int flag = 0;
+        #pragma omp parallel num_threads(2) shared(flag)
+        {
+            #pragma omp single
+            {
+                #pragma omp task shared(flag)
+                {
+                    my_signal(&flag);
+                    gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+                }
+
+                // make execution of task on another thread probable by waiting for signal of task
+                my_wait(&flag, 1);
+                #pragma omp taskwait
+                remote_data[0] = 42;
+            }
+        }
+    }
+
+{% endblock main %}

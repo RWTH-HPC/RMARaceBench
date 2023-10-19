@@ -1,0 +1,30 @@
+
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma atomic write","rma atomic write"],
+    "RACE_PAIR": ["shmem_int_atomic_add@{race_loc1}","shmem_int_atomic_add@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["shmem_barrier_all"],
+    "SYNC_CALLS": ["shmem_barrier_all"],
+    "NPROCS": 3,
+    "DESCRIPTION": "Two concurrent conflicting atomic operations with different datatypes, no atomicity guarantee."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block main %}
+    if (my_pe == 0)
+    {
+        // CONFLICT
+        shmem_int_atomic_set(&remote, 1, 1);
+        // CONFLICT
+        shmem_float_atomic_set((float*) &remote, 2.1, 1);
+    }
+    shmem_barrier_all();
+
+{% endblock main %}

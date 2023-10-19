@@ -1,0 +1,66 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+{%- if race %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","rma read"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","MPI_Get@{race_loc2}"],
+    "NPROCS": 3,
+    "CONSISTENCY_CALLS": ["MPI_Win_fence"],
+    "SYNC_CALLS": ["MPI_Win_fence"],
+    "DESCRIPTION": "Two conflicting operations get and put which are not synchronized correcly with an MPI_Win_fence leading to a remote race."
+}
+*/
+// RACE LABELS END
+{%- else %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["rma write","rma read"],
+    "NPROCS": 3,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock_all,MPI_Win_unlock_all,MPI_Win_flush_local_all"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "DESCRIPTION": "Two conflicting operations get and put which are synchronized correctly with an MPI_Win_fence leading to a remote race."
+}
+*/
+// RACE LABELS END
+{%- endif %}
+{%- endblock race_labels %}
+
+
+{% block main %}
+
+
+
+    MPI_Win_fence(0, win);
+
+    if (rank == 0) {
+        value = 0;
+        {%- if race %}
+        // CONFLICT
+        {%- endif %}
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+    }
+
+{%- if not race %}
+    MPI_Win_fence(0, win);
+{% endif %}
+
+    if (rank == 2) {
+        value = 2;
+        {%- if race %}
+        // CONFLICT
+        {%- endif %}
+        MPI_Get(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+    }
+
+    MPI_Win_fence(0, win);
+    
+    
+
+{% endblock main %}
+

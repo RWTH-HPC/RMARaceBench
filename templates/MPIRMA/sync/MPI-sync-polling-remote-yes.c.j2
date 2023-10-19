@@ -1,0 +1,48 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "NPROCS": 2,
+    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "ACCESS_SET": ["local buffer write","load"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","LOAD@{race_loc2}"],
+    "DESCRIPTION": "Polling on a window location. This leads to a data race, but is defined behavior according to the MPI standard. However, a race detector should nevertheless detect such a race."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block main %}
+    
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
+        // send "signal" to rank 1
+        int value = 1;
+        // CONFLICT
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win);
+    } else {
+        // poll on window location, wait for rank 0
+        volatile int* flag = &win_base[0];
+        // CONFLICT
+        while (*flag != 1) {
+            sleep(1);
+            // ensure progress in MPI implementation
+            MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
+            MPI_Win_unlock(1, win);
+        }
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+
+{% endblock main %}
+// CHECK-NOT: data race

@@ -1,0 +1,51 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["MPI_Put@{race_loc1}","LOAD@{race_loc2}"],
+    "CONSISTENCY_CALLS": ["MPI_Win_lock","MPI_Win_unlock"],
+    "SYNC_CALLS": ["MPI_Barrier"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Two conflicting operations MPI_Put and a local load with missing synchronization at process 1. Since only the main thread of the target synchronizes with the origin, the access of the non-master thread leads to a remote race."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{% block main %}
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
+        value = 42;
+        // CONFLICT
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Win_unlock(1, win);
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+
+    if (rank == 1) {
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp single nowait
+            { 
+                MPI_Barrier(MPI_COMM_WORLD); 
+            }
+            // CONFLICT
+            printf("win_base[0] is %d\n", win_base[0]);
+    }
+        
+    }
+    
+
+{% endblock main %}
