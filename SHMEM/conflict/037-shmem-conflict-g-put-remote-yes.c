@@ -47,7 +47,7 @@ int main(int argc, char** argv)
         localbuf = 2;
 
         // CONFLICT
-        shmem_int_put(&remote, &localbuf, 1, 0);
+        shmem_int_put(&remote, &localbuf, 1, 1);
     }
 
     shmem_barrier_all();

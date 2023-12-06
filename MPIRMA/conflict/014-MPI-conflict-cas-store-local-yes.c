@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer read","store"],
-    "RACE_PAIR": ["MPI_Compare_and_swap@54","STORE@57"],
+    "RACE_PAIR": ["MPI_Compare_and_swap@54","STORE@56"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations cas and store executed concurrently which leads to a race."
 }
@@ -16,7 +16,7 @@
 // RACE LABELS END
 // RACE_KIND: local
 // ACCESS_SET: [local buffer read,store]
-// RACE_PAIR: [MPI_Compare_and_swap@54,STORE@57]
+// RACE_PAIR: [MPI_Compare_and_swap@54,STORE@56]
 
 #include <mpi.h>
 #include <stdio.h>
@@ -51,8 +51,7 @@ int main(int argc, char** argv)
     MPI_Win_fence(0, win);
     if (rank == 0) {
         // CONFLICT
-        int cmp_value = 0;
-        MPI_Compare_and_swap(&value, &cmp_value, &value2, MPI_INT, 1, 1, win);
+        MPI_Compare_and_swap(&value, &win_base[0], &value2, MPI_INT, 1, 0, win);
         // CONFLICT
         value = 42;
     }

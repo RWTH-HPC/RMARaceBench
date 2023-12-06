@@ -42,7 +42,7 @@ int main(int argc, char** argv)
         // CONFLICT
         shmem_int_get_nbi(&localbuf, &remote, 1, 1);
         // CONFLICT
-        shmem_int_put_nbi(&remote, &localbuf, 1, 0);
+        shmem_int_put_nbi(&remote, &localbuf, 1, 1);
     }
 
     shmem_barrier_all();

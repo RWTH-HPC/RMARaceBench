@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma atomic write","store"],
-    "RACE_PAIR": ["MPI_Compare_and_swap@56","STORE@62"],
+    "RACE_PAIR": ["MPI_Compare_and_swap@56","STORE@61"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations cas and store executed concurrently which leads to a race."
 }
@@ -16,7 +16,7 @@
 // RACE LABELS END
 // RACE_KIND: remote
 // ACCESS_SET: [rma atomic write,store]
-// RACE_PAIR: [MPI_Compare_and_swap@56,STORE@62]
+// RACE_PAIR: [MPI_Compare_and_swap@56,STORE@61]
 
 #include <mpi.h>
 #include <stdio.h>
@@ -53,8 +53,7 @@ int main(int argc, char** argv)
     if (rank == 0) {
         /* conflicting cas and store */
         // CONFLICT
-        int cmp_value = 0;
-        MPI_Compare_and_swap(&value, &cmp_value, &value2, MPI_INT, 1, 1, win);
+        MPI_Compare_and_swap(&value, &win_base[0], &value2, MPI_INT, 1, 0, win);
     }
 
     if (rank == 1) {

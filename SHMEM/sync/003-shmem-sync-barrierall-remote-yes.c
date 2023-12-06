@@ -46,9 +46,9 @@ int main(int argc, char** argv)
 
         int myval = 42;
         // CONFLICT
-        shmem_int_put(&remote, &myval, 1, 0);
+        shmem_int_put(&remote, &myval, 1, 1);
         // CONFLICT
-        shmem_int_get(&localbuf, &remote, 1, 0);
+        shmem_int_get(&localbuf, &remote, 1, 1);
         shmem_barrier_all();
 
     } else {

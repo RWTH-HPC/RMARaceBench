@@ -43,13 +43,13 @@ int main(int argc, char** argv)
 
     if (my_pe == 0) {
         // CONFLICT
-        shmem_int_get_nbi(&localbuf, &remote, 1, 0);
+        shmem_int_get_nbi(&localbuf, &remote, 1, 1);
 
         shmem_fence(); // Doesn't order "RMA loads" (e.g. non-blocking get or atomic fetch)
 
         int localbuf2 = 42;
         // CONFLICT
-        shmem_int_put(&remote, &localbuf2, 1, 0);
+        shmem_int_put(&remote, &localbuf2, 1, 1);
     }
 
     shmem_barrier_all();

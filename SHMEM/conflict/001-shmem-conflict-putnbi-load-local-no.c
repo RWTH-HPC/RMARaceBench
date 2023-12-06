@@ -38,7 +38,7 @@ int main(int argc, char** argv)
     shmem_barrier_all();
 
     if (my_pe == 0) {
-        shmem_int_put_nbi(&remote, &localbuf, 1, 0);
+        shmem_int_put_nbi(&remote, &localbuf, 1, 1);
         printf("localbuf is %d\n", localbuf);
     }
 

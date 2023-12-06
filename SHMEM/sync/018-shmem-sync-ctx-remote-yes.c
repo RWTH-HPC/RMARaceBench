@@ -47,11 +47,11 @@ int main(int argc, char** argv)
     if (my_pe == 0) {
         localbuf = 42;
         // CONFLICT
-        shmem_ctx_int_put(ctx, &remote, &localbuf, 1, 0);
+        shmem_ctx_int_put(ctx, &remote, &localbuf, 1, 1);
         shmem_quiet();
         localbuf = 1337;
         // CONFLICT
-        shmem_ctx_int_put(ctx, &remote, &localbuf, 1, 0);
+        shmem_ctx_int_put(ctx, &remote, &localbuf, 1, 1);
     }
 
     shmem_barrier_all();

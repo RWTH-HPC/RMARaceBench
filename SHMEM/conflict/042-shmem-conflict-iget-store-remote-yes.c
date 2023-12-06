@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 
     if (my_pe == 0) {
         // CONFLICT
-        shmem_int_iget(&localbuf, &remote, 1, 1, 1, 0);
+        shmem_int_iget(&localbuf, &remote, 1, 1, 1, 1);
     }
 
     if (my_pe == 1) {

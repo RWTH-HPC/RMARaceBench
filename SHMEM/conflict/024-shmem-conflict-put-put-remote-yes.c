@@ -40,14 +40,14 @@ int main(int argc, char** argv)
 
     if (my_pe == 0) {
         // CONFLICT
-        shmem_int_put(&remote, &localbuf, 1, 0);
+        shmem_int_put(&remote, &localbuf, 1, 1);
     }
 
     if (my_pe == 2) {
         localbuf = 2;
 
         // CONFLICT
-        shmem_int_put(&remote, &localbuf, 1, 0);
+        shmem_int_put(&remote, &localbuf, 1, 1);
     }
 
     shmem_barrier_all();

@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     MPI_Win_fence(0, win);
     if (rank == 0) {
         // CONFLICT
-        MPI_Fetch_and_op(&value2, &value, MPI_INT, 1, 1, MPI_SUM, win);
+        MPI_Fetch_and_op(&value2, &value, MPI_INT, 1, 0, MPI_SUM, win);
         // CONFLICT
         printf("value is %d\n", value);
     }

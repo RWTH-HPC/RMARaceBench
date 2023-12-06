@@ -42,14 +42,14 @@ int main(int argc, char** argv)
 
     if (my_pe == 0) {
         int myval = 42;
-        shmem_int_put(&remote, &myval, 1, 0);
+        shmem_int_put(&remote, &myval, 1, 1);
     }
 
     shmem_quiet();
     shmem_sync(SHMEM_TEAM_WORLD);
 
     if (my_pe == 1) {
-        shmem_int_get(&localbuf, &remote, 1, 0);
+        shmem_int_get(&localbuf, &remote, 1, 1);
     }
 
     shmem_barrier_all();

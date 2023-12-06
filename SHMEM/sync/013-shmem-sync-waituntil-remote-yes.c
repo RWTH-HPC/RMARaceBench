@@ -46,7 +46,7 @@ int main(int argc, char** argv)
     if (my_pe == 0) {
         int myval = 42;
         // CONFLICT
-        shmem_int_put(&remote, &myval, 1, 0);
+        shmem_int_put(&remote, &myval, 1, 1);
 
         shmem_fence();
 

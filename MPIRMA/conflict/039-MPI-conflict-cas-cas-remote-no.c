@@ -49,14 +49,12 @@ int main(int argc, char** argv)
     MPI_Win_fence(0, win);
 
     if (rank == 0) {
-        int cmp_value = 0;
-        MPI_Compare_and_swap(&value, &cmp_value, &value2, MPI_INT, 1, 1, win);
+        MPI_Compare_and_swap(&value, &win_base[0], &value2, MPI_INT, 1, 0, win);
     }
 
     if (rank == 2) {
         value = 2;
-        int cmp_value = 0;
-        MPI_Compare_and_swap(&value, &cmp_value, &value2, MPI_INT, 1, 1, win);
+        MPI_Compare_and_swap(&value, &win_base[0], &value2, MPI_INT, 1, 0, win);
     }
 
     MPI_Win_fence(0, win);
