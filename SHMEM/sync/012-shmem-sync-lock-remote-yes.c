@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","rma write"],
-    "RACE_PAIR": ["shmem_int_put@49","shmem_int_put@59"],
+    "RACE_PAIR": ["shmem_int_put@53","shmem_int_put@63"],
     "NPROCS": 2,
     "CONSISTENCY_CALLS": ["shmem_set_lock,shmem_clear_lock"],
     "SYNC_CALLS": ["shmem_set_lock,shmem_clear_lock,shmem_barrier_all"],
@@ -16,6 +16,8 @@
 }
 */
 // RACE LABELS END
+
+#include <unistd.h>
 
 #include <shmem.h>
 #include <stdio.h>
@@ -43,6 +45,8 @@ int main(int argc, char** argv)
     shmem_barrier_all();
 
     if (my_pe == 0) {
+        // make it probable that PE 1 locks first to make race observable
+        sleep(1);
         localbuf = 42;
         shmem_set_lock(&lock);
         // CONFLICT

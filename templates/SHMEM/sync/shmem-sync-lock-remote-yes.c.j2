@@ -16,12 +16,18 @@
 // RACE LABELS END
 {% endblock race_labels %}
 
+{%- block preamble %}
+#include <unistd.h>
+{% endblock preamble%}
+
 {% block main %}
     static long lock;
 
     shmem_barrier_all();
 
     if (my_pe == 0) {
+        // make it probable that PE 1 locks first to make race observable
+        sleep(1);
         localbuf = 42;
         shmem_set_lock( &lock );
         // CONFLICT
