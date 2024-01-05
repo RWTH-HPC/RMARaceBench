@@ -545,7 +545,7 @@ def gen_sync_races():
         SourceTemplate("templates/MPIRMA/atomic/MPI-atomic-customdatatype-remote-no.c.j2", 3, [False], mpi_acc_acc),
         SourceTemplate("templates/MPIRMA/atomic/MPI-atomic-customdatatype-remote-yes.c.j2", 3, [True], mpi_acc_acc),
         SourceTemplate("templates/MPIRMA/atomic/MPI-atomic-disp-remote-yes.c.j2", 3, [True], mpi_acc_acc),
-        SourceTemplate("templates/MPIRMA/atomic/MPI-atomic-disp-remote-no.c.j2", 3, [True], mpi_acc_acc),
+        SourceTemplate("templates/MPIRMA/atomic/MPI-atomic-disp-remote-no.c.j2", 3, [False], mpi_acc_acc),
         SourceTemplate("templates/MPIRMA/atomic/MPI-atomic-short-int-remote-yes.c.j2", 3, [True], mpi_acc_acc),
         SourceTemplate("templates/MPIRMA/atomic/MPI-atomic-float-int-remote-yes.c.j2", 3, [True], mpi_acc_acc),
         SourceTemplate("templates/MPIRMA/atomic/MPI-atomic-float-int-sameorigin-remote-yes.c.j2", 2, [True], mpi_acc_acc),
