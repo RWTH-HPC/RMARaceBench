@@ -7,10 +7,10 @@
 /*
 {
     "RACE_KIND": "remote",
-    "ACCESS_SET": ["rma read","load"],
-    "RACE_PAIR": ["gaspi_read@62","LOAD@68"],
+    "ACCESS_SET": ["rma read","store"],
+    "RACE_PAIR": ["gaspi_read@62","STORE@68"],
     "NPROCS": 2,
-    "DESCRIPTION": "Two conflicting operations read and load executed concurrently which leads to a race."
+    "DESCRIPTION": "Two conflicting operations read and store executed concurrently which leads to a race."
 }
 */
 // RACE LABELS END
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 
     if (rank == 1) {
         // CONFLICT
-        printf("remote_data[0] is %d\n", remote_data[0]);
+        remote_data[0] = 42;
 
         gaspi_wait(queue_id, GASPI_BLOCK);
     }

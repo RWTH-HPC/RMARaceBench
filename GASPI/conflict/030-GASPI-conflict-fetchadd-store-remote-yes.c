@@ -7,10 +7,10 @@
 /*
 {
     "RACE_KIND": "remote",
-    "ACCESS_SET": ["rma atomic write","load"],
-    "RACE_PAIR": ["gaspi_atomic_fetch_add@62","LOAD@68"],
+    "ACCESS_SET": ["rma atomic write","store"],
+    "RACE_PAIR": ["gaspi_atomic_fetch_add@62","STORE@68"],
     "NPROCS": 2,
-    "DESCRIPTION": "Two conflicting operations fetchadd and load executed concurrently which leads to a race."
+    "DESCRIPTION": "Two conflicting operations fetchadd and store executed concurrently which leads to a race."
 }
 */
 // RACE LABELS END
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 
     if (rank == 1) {
         // CONFLICT
-        printf("remote_data[0] is %d\n", remote_data[0]);
+        remote_data[0] = 42;
     }
 
     // ensure synchronization between both ranks by using notifications

@@ -220,7 +220,7 @@ def gen_conflict_races():
     op_remote_store  = {
         Model.MPIRMA: [om.get(Model.MPIRMA, 'remote_store')],
         Model.SHMEM: [om.get(Model.SHMEM, 'remote_store')],
-        Model.GASPI:  [om.get(Model.GASPI, 'remote_load')]
+        Model.GASPI:  [om.get(Model.GASPI, 'remote_store')]
     } 
 
     op_rma_write = {
