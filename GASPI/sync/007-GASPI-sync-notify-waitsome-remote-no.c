@@ -57,7 +57,6 @@ int main(int argc, char* argv[])
     int* remote_data = (int*)dst_segment_data;
 
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
-    gaspi_notification_id_t firstId;
 
     if (rank == 0) {
         gaspi_write_notify(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), 0, 1, queue_id, GASPI_BLOCK);
