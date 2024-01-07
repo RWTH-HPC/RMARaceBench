@@ -19,7 +19,8 @@
         {{ op1.code }}
         {{ op2.code }}
 {%- endif %}
-{%- if op1.name in ['write', 'write2', 'read'] or op2.name in ['write', 'write2', 'read'] %}
+{%- if op1.name in ['write', 'write2', 'write_list', 'write_notify', 'write_list_notify', 'read', 'read_list', 'read_notify', 'read_list_notify'] or 
+       op2.name in ['write', 'write2', 'write_list', 'write_notify', 'write_list_notify', 'read', 'read_list', 'read_notify', 'read_list_notify']  %}
      gaspi_wait(queue_id, GASPI_BLOCK);
 {%- endif %}
   }

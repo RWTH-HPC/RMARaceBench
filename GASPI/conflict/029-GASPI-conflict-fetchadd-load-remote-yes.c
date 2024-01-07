@@ -68,12 +68,13 @@ int main(int argc, char* argv[])
         printf("remote_data[0] is %d\n", remote_data[0]);
     }
 
+    gaspi_wait(queue_id, GASPI_BLOCK);
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 
     // ensure synchronization between all ranks by using notifications
-    // to avoid race with printf statement (gaspi_barrier is not enough
-    // in some cases), both ranks send a notification to the other rank
-    // and wait for the notification from the other rank.
+    // to avoid race with printf statement (gaspi_wait + gaspi_barrier
+    // is not enough in some cases), both ranks send a notification to
+    // the other rank and wait for the notification from the other rank.
     for (int i = 0; i < num; i++) {
         gaspi_notify(remote_seg_id, i, rank, rank, queue_id, GASPI_BLOCK);
     }

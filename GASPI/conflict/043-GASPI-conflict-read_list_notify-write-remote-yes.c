@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma read","rma write"],
-    "RACE_PAIR": ["gaspi_read_list_notiy@63","gaspi_write@81"],
+    "RACE_PAIR": ["gaspi_read_list_notiy@62","gaspi_write@80"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations read_list_notify and write executed concurrently which leads to a race."
 }
@@ -58,7 +58,6 @@ int main(int argc, char* argv[])
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 
     if (rank == 0) {
-        localbuf[0] = 1;
         // CONFLICT
         gaspi_read_list_notify(
             1,
@@ -79,16 +78,16 @@ int main(int argc, char* argv[])
         localbuf[0] = 42;
         // CONFLICT
         gaspi_write(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
-
         gaspi_wait(queue_id, GASPI_BLOCK);
     }
 
+    gaspi_wait(queue_id, GASPI_BLOCK);
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 
     // ensure synchronization between all ranks by using notifications
-    // to avoid race with printf statement (gaspi_barrier is not enough
-    // in some cases), both ranks send a notification to the other rank
-    // and wait for the notification from the other rank.
+    // to avoid race with printf statement (gaspi_wait + gaspi_barrier
+    // is not enough in some cases), both ranks send a notification to
+    // the other rank and wait for the notification from the other rank.
     for (int i = 0; i < num; i++) {
         gaspi_notify(remote_seg_id, i, rank, rank, queue_id, GASPI_BLOCK);
     }

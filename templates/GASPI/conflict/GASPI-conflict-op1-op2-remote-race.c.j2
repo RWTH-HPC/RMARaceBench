@@ -7,7 +7,7 @@
 {% block main %}
 
   if (rank == 0) {
-{%- if op1.name in ['write', 'write2'] or op2.name in ['write', 'write2']%}
+{%- if op1.name in ['write', 'write2', 'write_list', 'write_notify', 'write_list_notify'] %}
      localbuf[0] = 1;
 {%- endif %}
 {%- if race %}
@@ -27,7 +27,7 @@
         // CONFLICT
         {%- endif %}
         {{ op2.code }}
-{% if op1.name in ['write', 'read'] or op2.name in ['write', 'read'] %}
+{%- if op2.name in ['write', 'write2', 'write_list', 'write_notify', 'write_list_notify', 'read', 'read_list', 'read_notify', 'read_list_notify']  %}
         gaspi_wait(queue_id, GASPI_BLOCK);
 {%- endif %}
     }
