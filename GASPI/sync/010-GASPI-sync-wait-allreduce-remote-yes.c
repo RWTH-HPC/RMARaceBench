@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","store"],
-    "RACE_PAIR": ["gaspi_read@-1","STORE@-1"],
+    "RACE_PAIR": ["gaspi_read@64","STORE@71"],
     "CONSISTENCY_CALLS": ["gaspi_wait"],
     "SYNC_CALLS": ["gaspi_allreduce"],
     "NPROCS": 3,
@@ -60,12 +60,14 @@ int main(int argc, char* argv[])
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 
     if (rank == 0) {
+        // CONFLICT
         gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
         gaspi_wait(queue_id, GASPI_BLOCK);
         printf("read result is %d\n", localbuf[0]);
     }
 
     if (rank == 1) {
+        // CONFLICT
         remote_data[0] = 42;
     }
 

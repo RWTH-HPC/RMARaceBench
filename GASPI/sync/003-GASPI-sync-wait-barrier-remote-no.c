@@ -59,7 +59,6 @@ int main(int argc, char* argv[])
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 
     if (rank == 0) {
-        // CONFLICT
         gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
         gaspi_wait(queue_id, GASPI_BLOCK);
     }
@@ -67,7 +66,6 @@ int main(int argc, char* argv[])
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK); // missing
 
     if (rank == 1) {
-        // CONFLICT
         remote_data[0] = 42;
     }
 
