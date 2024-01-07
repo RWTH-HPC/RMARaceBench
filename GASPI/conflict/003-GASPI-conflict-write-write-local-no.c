@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     if (rank == 0) {
         localbuf[0] = 1;
         gaspi_write(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
-        gaspi_write(loc_seg_id, 1, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
+        gaspi_write(loc_seg_id, 0, 0, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
         gaspi_wait(queue_id, GASPI_BLOCK);
     }
 

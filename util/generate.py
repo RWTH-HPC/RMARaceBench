@@ -152,7 +152,7 @@ om.add(Model.GASPI, 'local_store', 'store', 'STORE', 'store', 'store', 'localbuf
 om.add(Model.GASPI, 'remote_load', 'load', 'LOAD', 'load', 'load', 'printf("remote_data[0] is %d\\n", remote_data[0]);')
 om.add(Model.GASPI, 'remote_store', 'store', 'STORE', 'store', 'store', 'remote_data[0] = 42;')
 om.add(Model.GASPI, 'write', 'write', 'gaspi_write', 'local buffer read', 'rma write', 'gaspi_write(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);')
-om.add(Model.GASPI, 'write2', 'write', 'gaspi_write', 'local buffer read', 'rma write', 'gaspi_write(loc_seg_id, 1, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);')
+om.add(Model.GASPI, 'write2', 'write', 'gaspi_write', 'local buffer read', 'rma write', 'gaspi_write(loc_seg_id, 0, 0, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);')
 om.add(Model.GASPI, 'read', 'read', 'gaspi_read', 'local buffer write', 'rma read', 'gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);')
 om.add(Model.GASPI, 'fetchadd', 'fetchadd', 'gaspi_atomic_fetch_add', 'local buffer write', 'rma atomic write', 'gaspi_atomic_fetch_add(remote_seg_id, 0, 1, 1, &localbuf[0], GASPI_BLOCK);')
 om.add(Model.GASPI, 'write_list', 'write_list', 'gaspi_write_list', 'local buffer read', 'rma write', 'gaspi_write_list(1, &loc_seg_id, (gaspi_offset_t[]) {0}, 1, &remote_seg_id, (gaspi_offset_t[]) {0}, (gaspi_size_t[]) {sizeof(int)}, queue_id, GASPI_BLOCK);')
