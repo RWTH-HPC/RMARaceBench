@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","rma write"],
-    "RACE_PAIR": ["gaspi_write_list@63","gaspi_write@73"],
+    "RACE_PAIR": ["gaspi_write_list@63","gaspi_write@79"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations write_list and write executed concurrently which leads to a race."
 }
@@ -60,10 +60,16 @@ int main(int argc, char* argv[])
     if (rank == 0) {
         localbuf[0] = 1;
         // CONFLICT
-        gaspi_rank_t target = 1;
-        gaspi_size_t size = sizeof(int);
-        gaspi_offset_t offset = 0;
-        gaspi_write_list(1, &loc_seg_id, &offset, target, &remote_seg_id, &offset, &size, queue_id, GASPI_BLOCK);
+        gaspi_write_list(
+            1,
+            &loc_seg_id,
+            (gaspi_offset_t[]){0},
+            1,
+            &remote_seg_id,
+            (gaspi_offset_t[]){0},
+            (gaspi_size_t[]){sizeof(int)},
+            queue_id,
+            GASPI_BLOCK);
         gaspi_wait(queue_id, GASPI_BLOCK);
     }
 
@@ -75,15 +81,18 @@ int main(int argc, char* argv[])
         gaspi_wait(queue_id, GASPI_BLOCK);
     }
 
-    // ensure synchronization between both ranks by using notifications
+    gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+
+    // ensure synchronization between all ranks by using notifications
     // to avoid race with printf statement (gaspi_barrier is not enough
     // in some cases), both ranks send a notification to the other rank
     // and wait for the notification from the other rank.
-    gaspi_notify(remote_seg_id, (rank + 1) % 3, 42, 1, queue_id, GASPI_BLOCK);
+    for (int i = 0; i < num; i++) {
+        gaspi_notify(remote_seg_id, i, rank, rank, queue_id, GASPI_BLOCK);
+    }
     gaspi_notification_id_t firstId;
-    gaspi_notify_waitsome(remote_seg_id, 42, 1, &firstId, GASPI_BLOCK);
+    gaspi_notify_waitsome(remote_seg_id, 0, num, &firstId, GASPI_BLOCK);
 
-    gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
     printf(
         "Process %d: Execution finished, variable contents: localbuf[0] = %d, remote_data[0] = %d\n",
         rank,

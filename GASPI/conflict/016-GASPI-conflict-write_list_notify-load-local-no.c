@@ -57,17 +57,14 @@ int main(int argc, char* argv[])
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 
     if (rank == 0) {
-        gaspi_rank_t target = 1;
-        gaspi_size_t size = sizeof(int);
-        gaspi_offset_t offset = 0;
         gaspi_write_list_notify(
             1,
             &loc_seg_id,
-            &offset,
-            target,
+            (gaspi_offset_t[]){0},
+            1,
             &remote_seg_id,
-            &offset,
-            &size,
+            (gaspi_offset_t[]){0},
+            (gaspi_size_t[]){sizeof(int)},
             remote_seg_id,
             0,
             1,
@@ -76,15 +73,18 @@ int main(int argc, char* argv[])
         printf("localbuf[0] is %d\n", localbuf[0]);
     }
 
-    // ensure synchronization between both ranks by using notifications
+    gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+
+    // ensure synchronization between all ranks by using notifications
     // to avoid race with printf statement (gaspi_barrier is not enough
     // in some cases), both ranks send a notification to the other rank
     // and wait for the notification from the other rank.
-    gaspi_notify(remote_seg_id, (rank + 1) % 2, 42, 1, queue_id, GASPI_BLOCK);
+    for (int i = 0; i < num; i++) {
+        gaspi_notify(remote_seg_id, i, rank, rank, queue_id, GASPI_BLOCK);
+    }
     gaspi_notification_id_t firstId;
-    gaspi_notify_waitsome(remote_seg_id, 42, 1, &firstId, GASPI_BLOCK);
+    gaspi_notify_waitsome(remote_seg_id, 0, num, &firstId, GASPI_BLOCK);
 
-    gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
     printf(
         "Process %d: Execution finished, variable contents: localbuf[0] = %d, remote_data[0] = %d\n",
         rank,
