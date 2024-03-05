@@ -1,0 +1,39 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{%- block additional_declarations %}
+
+__attribute__((noinline)) void aliasgenerator(int** x, int** y) {
+    *y = *x;
+}
+
+{% endblock additional_declarations %}
+
+{% block main %}
+
+    MPI_Win_fence(0, win);
+
+    int* buf_alias;
+    int* win_base_alias;
+
+    aliasgenerator(&buf, &buf_alias);
+    aliasgenerator(&win_base, &win_base_alias);
+
+    if (rank == 0) {
+        {%- if race %}
+        /* conflicting {{ op1.name }} and {{ op2.name }} */
+        // CONFLICT
+        {%- endif %}
+        {{ op1.code.replace('buf','buf_alias').replace('win_base','win_base_alias') }}
+    } else {
+        {%- if race %}
+        // CONFLICT
+        {%- endif %}
+        {{ op2.code.replace('buf','buf_alias').replace('win_base','win_base_alias') }}
+    }
+
+    MPI_Win_fence(0, win);
+
+{% endblock main %}

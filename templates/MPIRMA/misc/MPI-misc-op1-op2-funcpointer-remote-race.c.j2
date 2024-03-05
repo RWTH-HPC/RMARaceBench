@@ -1,0 +1,40 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{%- block additional_declarations %}
+
+void rank0(int* buf, MPI_Win win, int* win_base) {
+    {%- if race %}
+    /* conflicting {{ op1.name }} and {{ op2.name }} */
+    // CONFLICT
+    {%- endif %}
+    {{ op1.code }}
+}
+
+void rank1(int* buf, MPI_Win win, int* win_base) {
+    {%- if race %}
+    // CONFLICT
+    {%- endif %}
+    {{ op2.code }}
+}
+
+{% endblock additional_declarations %}
+
+{% block main %}
+
+    void (*rankfunc)(int* buf, MPI_Win win, int* win_base);
+
+    MPI_Win_fence(0, win);
+
+    if (rank == 0) {
+        rankfunc = rank0;
+    } else {
+        rankfunc = rank1;
+    }
+    (*rankfunc)(buf,win,win_base);
+
+    MPI_Win_fence(0, win);
+
+{% endblock main %}

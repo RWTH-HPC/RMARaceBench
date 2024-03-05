@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser(prog="RMARaceBench Runner",
                                  description="Runs the tests of RMARaceBench and classifies the results")
 parser.add_argument('mode', choices=['plain', 'tools'], help='Run plain tests (MPI RMA, OpenSHMEM, GASPI) (choice: plain) or the tools on the MPI RMA test cases (choice: tools)', type=str)
 parser.add_argument('--tool', dest='tools', default=defaulttools, help='Select tools that should be tested (space-separated, default: all tools)', choices=['MUST', 'PARCOACH-dynamic', 'PARCOACH-static'], nargs='+', type=str)
-parser.add_argument('--discipline', dest='disciplines', default=defaultdisciplines, help='Select tool(s) that should be tested (space-separated, default: all disciplines)', choices=['conflict', 'sync', 'atomic', 'hybrid'], nargs='+', type=str)
+parser.add_argument('--discipline', dest='disciplines', default=defaultdisciplines, help='Select tool(s) that should be tested (space-separated, default: all disciplines)', choices=['conflict', 'sync', 'atomic', 'hybrid', 'misc'], nargs='+', type=str)
 parser.add_argument('--rma-model', dest='rma_models', default=defaultrmamodels, help='Select RMA model(s) that should be tested (space-separated, default: all models)', choices=['MPIRMA', 'SHMEM', 'GASPI'], nargs='+', type=str)
 parser.add_argument('-o', '--output-folder', dest='output_folder', default='results-' + datetime.now().strftime("%Y%m%d-%H%M%S"), help='Set output folder, default is results-Ymd-HMS')
 

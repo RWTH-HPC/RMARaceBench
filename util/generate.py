@@ -56,6 +56,7 @@ caseCounters = {
     'sync': CaseCounter(),
     'atomic': CaseCounter(),
     'hybrid': CaseCounter(),
+    'misc': CaseCounter()
 }
 
 class Operation:
@@ -101,13 +102,13 @@ class OperationManager:
 
 
 om = OperationManager()
-om.add(Model.MPIRMA, 'local_load', 'load', 'LOAD', 'load', 'load', 'printf("value is %d\\n", value);')
-om.add(Model.MPIRMA, 'local_store', 'store', 'STORE', 'store', 'store', 'value = 42;')
-om.add(Model.MPIRMA, 'put', 'put', 'MPI_Put', 'local buffer read', 'rma write', 'MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);')
-om.add(Model.MPIRMA, 'put2', 'put', 'MPI_Put', 'local buffer read', 'rma write', 'MPI_Put(&value, 1, MPI_INT, 1, 1, 1, MPI_INT, win);')
+om.add(Model.MPIRMA, 'local_load', 'load', 'LOAD', 'load', 'load', 'printf("value is %d\\n", *buf);')
+om.add(Model.MPIRMA, 'local_store', 'store', 'STORE', 'store', 'store', '*buf = 42;')
+om.add(Model.MPIRMA, 'put', 'put', 'MPI_Put', 'local buffer read', 'rma write', 'MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);')
+om.add(Model.MPIRMA, 'put2', 'put', 'MPI_Put', 'local buffer read', 'rma write', 'MPI_Put(buf, 1, MPI_INT, 1, 1, 1, MPI_INT, win);')
 om.add(Model.MPIRMA, 'acc', 'acc', 'MPI_Accumulate', 'local buffer read', 'rma atomic write', 'MPI_Accumulate(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, MPI_SUM, win);')
 om.add(Model.MPIRMA, 'acc2', 'acc', 'MPI_Accumulate', 'local buffer read', 'rma atomic write', 'MPI_Accumulate(&value, 1, MPI_INT, 1, 1, 1, MPI_INT, MPI_SUM, win);')
-om.add(Model.MPIRMA, 'get', 'get', 'MPI_Get', 'local buffer write', 'rma read', 'MPI_Get(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);')
+om.add(Model.MPIRMA, 'get', 'get', 'MPI_Get', 'local buffer write', 'rma read', 'MPI_Get(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);')
 om.add(Model.MPIRMA, 'remote_load', 'load', 'LOAD', 'load', 'load', 'printf("win_base[0] is %d\\n", win_base[0]);')
 om.add(Model.MPIRMA, 'remote_store', 'store', 'STORE', 'store', 'store', 'win_base[0] = 42;')
 om.add(Model.MPIRMA, 'rget', 'rget','MPI_Rget', 'local buffer write', 'rma read', 'MPI_Rget(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win, &req);')
@@ -163,93 +164,73 @@ om.add(Model.GASPI, 'read_list_notify', 'read_list_notify', 'gaspi_read_list_not
 om.add(Model.GASPI, 'write_notify', 'write_notify', 'gaspi_write_notify', 'local buffer read', 'rma write', 'gaspi_write_notify(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), 0, 1, queue_id, GASPI_BLOCK);')
 om.add(Model.GASPI, 'read_notify', 'read_notify', 'gaspi_read_notify', 'local buffer write', 'rma read', 'gaspi_read_notify(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), 0, queue_id, GASPI_BLOCK);')
 
+op_local_load = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'local_load')],
+    Model.SHMEM:  [om.get(Model.SHMEM, 'local_load')],
+    Model.GASPI:  [om.get(Model.GASPI, 'local_load')]
+}
+
+op_local_store = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'local_store')],
+    Model.SHMEM:  [om.get(Model.SHMEM, 'local_store')],
+    Model.GASPI:  [om.get(Model.GASPI, 'local_store')]
+}
+
+op_local_buffer_read = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'put')],
+    Model.SHMEM:  [om.get(Model.SHMEM, 'putnbi')],
+    Model.GASPI:  [om.get(Model.GASPI, 'write')]
+}
+
+op_local_buffer_read2 = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'put2')],
+    Model.SHMEM:  [om.get(Model.SHMEM, 'putnbi2')],
+    Model.GASPI:  [om.get(Model.GASPI, 'write2')]
+}
+
+op_local_buffer_write = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'get')],
+    Model.SHMEM:  [om.get(Model.SHMEM, 'getnbi')],
+    Model.GASPI:  [om.get(Model.GASPI, 'read')]
+}
+
+op_remote_load  = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'remote_load')],
+    Model.SHMEM: [om.get(Model.SHMEM, 'remote_load')],
+    Model.GASPI:  [om.get(Model.GASPI, 'remote_load')]
+} 
+
+op_remote_store  = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'remote_store')],
+    Model.SHMEM: [om.get(Model.SHMEM, 'remote_store')],
+    Model.GASPI:  [om.get(Model.GASPI, 'remote_store')]
+} 
+
+op_rma_write = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'put')],
+    Model.SHMEM:  [om.get(Model.SHMEM, 'put')],
+    Model.GASPI:  [om.get(Model.GASPI, 'write')]
+}
+
+op_rma_read = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'get')],
+    Model.SHMEM:  [om.get(Model.SHMEM, 'get')],
+    Model.GASPI:  [om.get(Model.GASPI, 'read')]
+}
+
+op_rma_atomic_write = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'acc')],
+    Model.SHMEM:  [om.get(Model.SHMEM, 'atomicset')],
+    Model.GASPI:  [om.get(Model.GASPI, 'fetchadd')]
+}
+
+op_rma_atomic_read = {
+    Model.MPIRMA: [om.get(Model.MPIRMA, 'gaccread')],
+    Model.SHMEM:  [om.get(Model.SHMEM, 'atomicfetch')],
+    Model.GASPI:  []
+}
+
 def gen_conflict_races():
-    op_local_load = {
-        Model.MPIRMA: [om.get(Model.MPIRMA, 'local_load')],
-        Model.SHMEM:  [om.get(Model.SHMEM, 'local_load')],
-        Model.GASPI:  [om.get(Model.GASPI, 'local_load')]
-    }
-
-    op_local_store = {
-        Model.MPIRMA: [om.get(Model.MPIRMA, 'local_store')],
-        Model.SHMEM:  [om.get(Model.SHMEM, 'local_store')],
-        Model.GASPI:  [om.get(Model.GASPI, 'local_store')]
-    }
-
-    op_local_buffer_read = {
-        Model.MPIRMA: [
-             om.get(Model.MPIRMA, 'put'),
-             ],
-        Model.SHMEM:  [
-             om.get(Model.SHMEM, 'putnbi'),
-             ],
-        Model.GASPI:  [
-             om.get(Model.GASPI, 'write'),
-             ]
-    }
-
-    op_local_buffer_read2 = {
-        Model.MPIRMA: [
-             om.get(Model.MPIRMA, 'put2'),
-             ],
-        Model.SHMEM:  [
-             om.get(Model.SHMEM, 'putnbi2'),
-             ],
-        Model.GASPI:  [
-             om.get(Model.GASPI, 'write2'),
-             ]
-    }
-
-    op_local_buffer_write = {
-        Model.MPIRMA: [
-             om.get(Model.MPIRMA, 'get'),
-        ],
-        Model.SHMEM:  [
-             om.get(Model.SHMEM, 'getnbi'),
-        ],
-        Model.GASPI:  [
-             om.get(Model.GASPI, 'read'),
-             ]
-    }
-
-    op_remote_load  = {
-        Model.MPIRMA: [om.get(Model.MPIRMA, 'remote_load')],
-        Model.SHMEM: [om.get(Model.SHMEM, 'remote_load')],
-        Model.GASPI:  [om.get(Model.GASPI, 'remote_load')]
-    } 
-
-    op_remote_store  = {
-        Model.MPIRMA: [om.get(Model.MPIRMA, 'remote_store')],
-        Model.SHMEM: [om.get(Model.SHMEM, 'remote_store')],
-        Model.GASPI:  [om.get(Model.GASPI, 'remote_store')]
-    } 
-
-    op_rma_write = {
-        Model.MPIRMA: [om.get(Model.MPIRMA, 'put')],
-        Model.SHMEM:  [om.get(Model.SHMEM, 'put')],
-        Model.GASPI:  [om.get(Model.GASPI, 'write')]
-    }
-
-    op_rma_read = {
-        Model.MPIRMA: [om.get(Model.MPIRMA, 'get')],
-        Model.SHMEM:  [om.get(Model.SHMEM, 'get')],
-        Model.GASPI:  [om.get(Model.GASPI, 'read')]
-    }
-
-    op_rma_atomic_write = {
-        Model.MPIRMA: [om.get(Model.MPIRMA, 'acc')],
-        Model.SHMEM:  [om.get(Model.SHMEM, 'atomicset')],
-        Model.GASPI:  [om.get(Model.GASPI, 'fetchadd')]
-    }
-
-    op_rma_atomic_read = {
-        Model.MPIRMA: [om.get(Model.MPIRMA, 'gaccread')],
-        Model.SHMEM:  [om.get(Model.SHMEM, 'atomicfetch')],
-        Model.GASPI:  []
-    }
-
-
-
     local_race_combinations = [
         (op_local_buffer_read, op_local_load, False),
         (op_local_buffer_read, op_local_store, True),
@@ -457,6 +438,56 @@ def render_template(template_file: str, number: int, model: Model, op1: Operatio
     
     print(f"Generated test case {filename}.")
 
+def gen_misc_races():
+    # Currently, only MPIRMA test cases generated
+
+    local_race_combinations = [
+        (op_local_buffer_read, op_local_load, False),
+        (op_local_buffer_read, op_local_store, True),
+        (op_local_buffer_read, op_local_buffer_read2, False),
+        (op_local_buffer_write, op_local_load, True),
+    ]
+    remote_race_combinations = [
+        (op_rma_read, op_remote_load,  False, 2),
+        (op_rma_read, op_remote_store, True,  2),
+        (op_rma_write, op_remote_load,  True,  2),
+    ]
+
+    local_src_templates = [
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-deep-nesting-local-race.c.j2", 2,  [], local_race_combinations), 
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-aliasing-local-race.c.j2", 2,  [], local_race_combinations),
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-retval-local-race.c.j2", 2,  [], local_race_combinations),
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-memcpy-local-race.c.j2", 2,  [], local_race_combinations),
+    ]
+
+    remote_src_templates = [
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-deep-nesting-remote-race.c.j2", 2, [], remote_race_combinations),
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-funcpointer-remote-race.c.j2", 2,  [], remote_race_combinations), 
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-aliasing-remote-race.c.j2", 2,  [], remote_race_combinations),
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-retval-remote-race.c.j2", 2,  [], remote_race_combinations),
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-memcpy-remote-race.c.j2", 2,  [], remote_race_combinations),
+    ]
+
+    for (ops1, ops2, has_race) in local_race_combinations:
+        generated_combos = set()
+        for op1 in ops1['MPIRMA']:
+            for op2 in ops2['MPIRMA']:
+                if tuple(sorted([op1.name, op2.name])) in generated_combos:
+                    continue
+                generated_combos.add(tuple(sorted([op1.name, op2.name])))
+                for template in local_src_templates:
+                    render_template(template.filename, caseCounters['misc'].inc_get('MPIRMA', has_race), 'MPIRMA', op1, op2, has_race, template.nprocs)
+
+    for (ops1, ops2, has_race, nprocs) in remote_race_combinations:
+        generated_combos = set()
+        for op1 in ops1['MPIRMA']:
+            for op2 in ops2['MPIRMA']:
+                if tuple(sorted([op1.name, op2.name])) in generated_combos:
+                    continue
+                generated_combos.add(tuple(sorted([op1.name, op2.name])))
+                for template in remote_src_templates:
+                    render_template(template.filename, caseCounters['misc'].inc_get('MPIRMA', has_race), 'MPIRMA', op1, op2, has_race, nprocs)
+
 
 def gen_sync_races():
     caseCounter = CaseCounter()
@@ -663,6 +694,7 @@ def gen_sync_races():
 
 gen_conflict_races()
 gen_sync_races()
+gen_misc_races()
 
 
 def printCases(name: str, counter: CaseCounter):
@@ -678,9 +710,10 @@ def printStaticstics():
     printCases(f'{"Synchronization": <16}', caseCounters['sync'])
     printCases(f'{"Atomic": <16}', caseCounters['atomic'])
     printCases(f'{"Hybrid": <16}', caseCounters['hybrid'])
+    printCases(f'{"Misc": <16}', caseCounters['misc'])
     total = CaseCounter()
     for model in Model:
-        for discipline in ['conflict', 'sync', 'atomic', 'hybrid']:
+        for discipline in ['conflict', 'sync', 'atomic', 'hybrid', 'misc']:
             total.set(model, total.get(model) + caseCounters[discipline].get(model))
             total.set_races(model, total.get_races(model) + caseCounters[discipline].get_races(model))
     print('\midrule')

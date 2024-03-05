@@ -1,0 +1,43 @@
+{% extends "templates/MPIRMA/MPI-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{%- block additional_declarations %}
+
+__attribute__((noinline)) void deeeeeeeeep(int* buf, MPI_Win win) {
+    {%- if race %}
+    /* conflicting {{ op1.name }} and {{ op2.name }} */
+    // CONFLICT
+    {%- endif %}
+    {{ op1.code }}
+}
+
+__attribute__((noinline)) void deeeeeeeep(int* buf, MPI_Win win) { deeeeeeeeep(buf,win); }
+__attribute__((noinline)) void deeeeeeep(int* buf, MPI_Win win) { deeeeeeeep(buf,win); }
+__attribute__((noinline)) void deeeeeep(int* buf, MPI_Win win) { deeeeeeep(buf,win); }
+__attribute__((noinline)) void deeeeep(int* buf, MPI_Win win) { deeeeeep(buf,win); }
+__attribute__((noinline)) void deeeep(int* buf, MPI_Win win) { deeeeep(buf,win); }
+__attribute__((noinline)) void deeep(int* buf, MPI_Win win) { deeeep(buf,win); }
+__attribute__((noinline)) void deep(int* buf, MPI_Win win) { deeep(buf,win); }
+
+void rank0(int* buf, MPI_Win win) {
+    deep(buf,win);
+}
+
+{% endblock additional_declarations %}
+
+{% block main %}
+    MPI_Win_fence(0, win);
+
+    if (rank == 0) {
+        rank0(buf,win);
+    } else {
+        {%- if race %}
+        // CONFLICT
+        {%- endif %}
+        {{ op2.code }}
+    }
+    MPI_Win_fence(0, win);
+
+{% endblock main %}
