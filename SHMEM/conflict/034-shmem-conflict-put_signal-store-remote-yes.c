@@ -24,8 +24,8 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
+    static uint64_t ps_sig_addr = 0;
 
     shmem_init();
 
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 
     if (my_pe == 0) {
         // CONFLICT
-        shmem_int_put_signal(&remote, &localbuf, 1, &remote2, 1, SHMEM_SIGNAL_SET, 1);
+        shmem_int_put_signal(&remote, &localbuf, 1, &ps_sig_addr, 1, SHMEM_SIGNAL_SET, 1);
     }
 
     if (my_pe == 1) {

@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
-    "RACE_PAIR": ["shmem_put_nbi@61","LOAD@81"],
+    "RACE_PAIR": ["shmem_put_nbi@60","LOAD@80"],
     "CONSISTENCY_CALLS": ["shmem_quiet"],
     "SYNC_CALLS": ["shmem_sync_all"],
     "NPROCS": 2,
@@ -43,7 +43,6 @@ void my_wait(int* s, int v)
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
 
     shmem_init();

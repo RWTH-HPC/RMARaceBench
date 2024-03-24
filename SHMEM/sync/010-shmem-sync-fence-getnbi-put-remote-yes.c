@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma read","rma write"],
-    "RACE_PAIR": ["shmem_int_get@46","shmem_int_put@52"],
+    "RACE_PAIR": ["shmem_int_get@45","shmem_int_put@51"],
     "NPROCS": 2,
     "CONSISTENCY_CALLS": ["shmem_fence"],
     "SYNC_CALLS": ["shmem_barrier_all"],
@@ -26,7 +26,6 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
 
     shmem_init();

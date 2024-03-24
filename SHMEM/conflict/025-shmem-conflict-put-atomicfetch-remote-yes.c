@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","rma atomic read"],
-    "RACE_PAIR": ["shmem_int_put@43","shmem_int_atomic_fetch@50"],
+    "RACE_PAIR": ["shmem_int_put@42","shmem_int_atomic_fetch@49"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations put and atomicfetch executed concurrently which leads to a race."
 }
@@ -24,7 +24,6 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
 
     shmem_init();

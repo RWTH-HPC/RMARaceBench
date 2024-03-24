@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","rma write"],
-    "RACE_PAIR": ["shmem_int_put_signal@43","shmem_int_put_signal@50"],
+    "RACE_PAIR": ["shmem_int_put_signal@44","shmem_int_put_signal@51"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations put_signal and put_signal executed concurrently which leads to a race."
 }
@@ -24,8 +24,9 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
+    static uint64_t ps_sig_addr = 0;
+    static uint64_t ps_sig_addr = 0;
 
     shmem_init();
 
@@ -40,14 +41,14 @@ int main(int argc, char** argv)
 
     if (my_pe == 0) {
         // CONFLICT
-        shmem_int_put_signal(&remote, &localbuf, 1, &remote2, 1, SHMEM_SIGNAL_SET, 1);
+        shmem_int_put_signal(&remote, &localbuf, 1, &ps_sig_addr, 1, SHMEM_SIGNAL_SET, 1);
     }
 
     if (my_pe == 2) {
         localbuf = 2;
 
         // CONFLICT
-        shmem_int_put_signal(&remote, &localbuf, 1, &remote2, 1, SHMEM_SIGNAL_SET, 1);
+        shmem_int_put_signal(&remote, &localbuf, 1, &ps_sig_addr, 1, SHMEM_SIGNAL_SET, 1);
     }
 
     shmem_barrier_all();

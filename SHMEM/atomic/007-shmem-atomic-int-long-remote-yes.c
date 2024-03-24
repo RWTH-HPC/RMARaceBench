@@ -9,7 +9,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma atomic write","rma atomic write"],
-    "RACE_PAIR": ["shmem_int_atomic_add@46","shmem_int_atomic_add@51"],
+    "RACE_PAIR": ["shmem_int_atomic_add@45","shmem_int_atomic_add@50"],
     "CONSISTENCY_CALLS": ["shmem_barrier_all"],
     "SYNC_CALLS": ["shmem_barrier_all"],
     "NPROCS": 3,
@@ -27,7 +27,6 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
 
     shmem_init();

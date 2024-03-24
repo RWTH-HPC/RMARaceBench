@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","local buffer read"],
-    "RACE_PAIR": ["shmem_int_get_nbi@43","shmem_int_put_nbi@45"],
+    "RACE_PAIR": ["shmem_int_get_nbi@42","shmem_int_put_nbi@44"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations getnbi and putnbi executed concurrently which leads to a race."
 }
@@ -24,7 +24,6 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
 
     shmem_init();

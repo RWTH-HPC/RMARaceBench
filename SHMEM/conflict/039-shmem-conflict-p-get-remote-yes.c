@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","rma read"],
-    "RACE_PAIR": ["shmem_int_p@43","shmem_int_get@50"],
+    "RACE_PAIR": ["shmem_int_p@42","shmem_int_get@49"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations p and get executed concurrently which leads to a race."
 }
@@ -24,7 +24,6 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
 
     shmem_init();

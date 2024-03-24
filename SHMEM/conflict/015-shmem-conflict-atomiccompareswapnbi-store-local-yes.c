@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","store"],
-    "RACE_PAIR": ["shmem_int_compare_swap_nbi@43","STORE@45"],
+    "RACE_PAIR": ["shmem_int_compare_swap_nbi@42","STORE@44"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations atomiccompareswapnbi and store executed concurrently which leads to a race."
 }
@@ -24,7 +24,6 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
 
     shmem_init();

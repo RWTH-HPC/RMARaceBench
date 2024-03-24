@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
-    "RACE_PAIR": ["shmem_put@52","LOAD@68"],
+    "RACE_PAIR": ["shmem_put@54","LOAD@70"],
     "CONSISTENCY_CALLS": ["shmem_quiet"],
     "SYNC_CALLS": ["MPI_Barrier"],
     "NPROCS": 2,
@@ -26,7 +26,6 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
 
     shmem_init();
@@ -38,6 +37,9 @@ int main(int argc, char** argv)
         printf("Got %d PEs, expected %d\n", num_pe, PROC_NUM);
         shmem_global_exit(1);
     }
+
+    static int remote2 = 0;
+
     shmem_barrier_all();
 
     if (my_pe == 0) {

@@ -41,7 +41,6 @@ void my_wait(int* s, int v)
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
 
     shmem_init();

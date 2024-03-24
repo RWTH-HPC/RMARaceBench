@@ -20,6 +20,9 @@
 {% endblock preamble %}
 
 {% block main %}
+
+    static int remote2 = 0;
+
     shmem_barrier_all();
 
     if (my_pe == 0) {

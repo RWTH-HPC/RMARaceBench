@@ -23,8 +23,8 @@
 int main(int argc, char** argv)
 {
     static int remote = 0;
-    static int remote2 = 0;
     int localbuf = 1;
+    static uint64_t psn_sig_addr = 0;
 
     shmem_init();
 
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
     shmem_barrier_all();
 
     if (my_pe == 0) {
-        shmem_int_put_signal_nbi(&remote, &localbuf, 1, &remote2, 1, SHMEM_SIGNAL_SET, 1);
+        shmem_int_put_signal_nbi(&remote, &localbuf, 1, &psn_sig_addr, 1, SHMEM_SIGNAL_SET, 1);
         printf("localbuf is %d\n", localbuf);
     }
 
