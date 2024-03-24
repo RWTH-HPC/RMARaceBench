@@ -19,6 +19,10 @@
 {% block preamble %}
 {% endblock preamble %}
 
+{%- block additional_declarations %}
+#include <unistd.h>
+{% endblock additional_declarations %}
+
 {% block main %}
 
     static int remote2 = 0;

@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
-    "RACE_PAIR": ["gaspi_read@71","STORE@91"],
+    "RACE_PAIR": ["gaspi_read@72","STORE@92"],
     "CONSISTENCY_CALLS": ["gaspi_wait"],
     "SYNC_CALLS": ["gaspi_barrier"],
     "NPROCS": 2,
@@ -21,6 +21,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define PROC_NUM 2
 

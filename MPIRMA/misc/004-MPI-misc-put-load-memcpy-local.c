@@ -6,22 +6,19 @@
 // RACE LABELS BEGIN
 /*
 {
-    "RACE_KIND": "remote",
-    "ACCESS_SET": ["rma write","load"],
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["local buffer read","load"],
     "NPROCS": 2,
-    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
-    "SYNC_CALLS": ["MPI_Barrier"],
-    "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Put@59","LOAD@65"],
-    "DESCRIPTION": "Polling on a window location. This leads to a data race, but is defined behavior according to the MPI standard. However, a race detector should nevertheless detect such a race."
+    "DESCRIPTION": "Two non-conflicting operations put and load executed concurrently with no race."
 }
 */
 // RACE LABELS END
+// RACE_KIND: none
+// ACCESS_SET: [local buffer read,load]
 
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -32,6 +29,7 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
@@ -49,34 +47,26 @@ int main(int argc, char** argv)
         win_base[i] = 0;
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Win_fence(0, win);
+
+    int* buf_alias;
+    int* win_base_alias;
+
+    memcpy(&buf_alias, &buf, sizeof(int*));
+    memcpy(&win_base_alias, &win_base, sizeof(int*));
 
     if (rank == 0) {
-        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
-        // send "signal" to rank 1
-        int value = 1;
-        // CONFLICT
-        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
-        MPI_Win_unlock(1, win);
-    } else {
-        // poll on window location, wait for rank 0
-        volatile int* flag = &win_base[0];
-        // CONFLICT
-        while (*flag != 1) {
-            sleep(1);
-            // ensure progress in MPI implementation
-            MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
-            MPI_Win_unlock(1, win);
-        }
+        MPI_Put(buf_alias, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        printf("value is %d\n", *buf_alias);
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Win_fence(0, win);
 
     MPI_Barrier(MPI_COMM_WORLD);
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 

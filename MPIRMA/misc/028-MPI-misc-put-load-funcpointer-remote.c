@@ -8,20 +8,32 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
+    "RACE_PAIR": ["MPI_Put@29","LOAD@35"],
     "NPROCS": 2,
-    "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
-    "SYNC_CALLS": ["MPI_Barrier"],
-    "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Put@59","LOAD@65"],
-    "DESCRIPTION": "Polling on a window location. This leads to a data race, but is defined behavior according to the MPI standard. However, a race detector should nevertheless detect such a race."
+    "DESCRIPTION": "Two conflicting operations put and load executed concurrently which leads to a race."
 }
 */
 // RACE LABELS END
+// RACE_KIND: remote
+// ACCESS_SET: [rma write,load]
+// RACE_PAIR: [MPI_Put@29,LOAD@35]
 
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+
+void rank0(int* buf, MPI_Win win, int* win_base)
+{
+    /* conflicting put and load */
+    // CONFLICT
+    MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+}
+
+void rank1(int* buf, MPI_Win win, int* win_base)
+{
+    // CONFLICT
+    printf("win_base[0] is %d\n", win_base[0]);
+}
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -32,6 +44,7 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
@@ -49,34 +62,24 @@ int main(int argc, char** argv)
         win_base[i] = 0;
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    void (*rankfunc)(int* buf, MPI_Win win, int* win_base);
+
+    MPI_Win_fence(0, win);
 
     if (rank == 0) {
-        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
-        // send "signal" to rank 1
-        int value = 1;
-        // CONFLICT
-        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
-        MPI_Win_unlock(1, win);
+        rankfunc = rank0;
     } else {
-        // poll on window location, wait for rank 0
-        volatile int* flag = &win_base[0];
-        // CONFLICT
-        while (*flag != 1) {
-            sleep(1);
-            // ensure progress in MPI implementation
-            MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
-            MPI_Win_unlock(1, win);
-        }
+        rankfunc = rank1;
     }
+    (*rankfunc)(buf, win, win_base);
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Win_fence(0, win);
 
     MPI_Barrier(MPI_COMM_WORLD);
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 

@@ -8,19 +8,36 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
-    "RACE_PAIR": ["MPI_Put@67","LOAD@83"],
-    "CONSISTENCY_CALLS": ["MPI_Win_lock","MPI_Win_unlock"],
-    "SYNC_CALLS": ["MPI_Barrier"],
+    "RACE_PAIR": ["MPI_Put@29","LOAD@74"],
     "NPROCS": 2,
-    "DESCRIPTION": "Two conflicting operations MPI_Get and a local load with missing synchronization, because only the other thread at the origin synchronizes with the target."
+    "DESCRIPTION": "Two conflicting operations put and load executed concurrently which leads to a race."
 }
 */
 // RACE LABELS END
+// RACE_KIND: remote
+// ACCESS_SET: [rma write,load]
+// RACE_PAIR: [MPI_Put@29,LOAD@74]
 
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+
+__attribute__((noinline)) void deeeeeeeeep(int* buf, MPI_Win win)
+{
+    /* conflicting put and load */
+    // CONFLICT
+    MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+}
+
+__attribute__((noinline)) void deeeeeeeep(int* buf, MPI_Win win) { deeeeeeeeep(buf, win); }
+__attribute__((noinline)) void deeeeeeep(int* buf, MPI_Win win) { deeeeeeeep(buf, win); }
+__attribute__((noinline)) void deeeeeep(int* buf, MPI_Win win) { deeeeeeep(buf, win); }
+__attribute__((noinline)) void deeeeep(int* buf, MPI_Win win) { deeeeeep(buf, win); }
+__attribute__((noinline)) void deeeep(int* buf, MPI_Win win) { deeeeep(buf, win); }
+__attribute__((noinline)) void deeep(int* buf, MPI_Win win) { deeeep(buf, win); }
+__attribute__((noinline)) void deep(int* buf, MPI_Win win) { deeep(buf, win); }
+
+void rank0(int* buf, MPI_Win win) { deep(buf, win); }
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -31,15 +48,11 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
-    int provided;
-    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
-    if (provided < MPI_THREAD_MULTIPLE) {
-        printf("MPI_THREAD_MULTIPLE not supported\n");
-        MPI_Abort(MPI_COMM_WORLD, 1);
-    }
+    MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
@@ -52,42 +65,21 @@ int main(int argc, char** argv)
     for (int i = 0; i < WIN_SIZE; i++) {
         win_base[i] = 0;
     }
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Win_fence(0, win);
 
     if (rank == 0) {
-#pragma omp parallel num_threads(2)
-        {
-#pragma omp sections
-            {
-#pragma omp section
-                {
-                    int value = 42;
-                    MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
-                    // CONFLICT
-                    MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win); // Put on win_base[0] at process 1
-                    MPI_Win_unlock(1, win);
-                }
-
-#pragma omp section
-                {
-                    sleep(1); // force that MPI_Put goes through first
-                    MPI_Barrier(MPI_COMM_WORLD);
-                }
-            }
-        }
-    }
-
-    if (rank == 1) {
-        MPI_Barrier(MPI_COMM_WORLD);
+        rank0(buf, win);
+    } else {
         // CONFLICT
         printf("win_base[0] is %d\n", win_base[0]);
     }
+    MPI_Win_fence(0, win);
 
     MPI_Barrier(MPI_COMM_WORLD);
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 

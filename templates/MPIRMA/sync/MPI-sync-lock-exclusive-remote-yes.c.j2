@@ -16,6 +16,9 @@
 // RACE LABELS END
 {%- endblock race_labels %}
 
+{%- block additional_declarations %}
+#include <unistd.h>
+{% endblock additional_declarations %}
 
 {% block win_allocate %}
     MPI_Win win2;
