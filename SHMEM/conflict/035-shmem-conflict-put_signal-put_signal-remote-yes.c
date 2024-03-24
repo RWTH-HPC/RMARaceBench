@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     static int remote = 0;
     int localbuf = 1;
     static uint64_t ps_sig_addr = 0;
-    static uint64_t ps_sig_addr = 0;
+    static uint64_t ps_sig_addr2 = 0;
 
     shmem_init();
 
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
         localbuf = 2;
 
         // CONFLICT
-        shmem_int_put_signal(&remote, &localbuf, 1, &ps_sig_addr, 1, SHMEM_SIGNAL_SET, 1);
+        shmem_int_put_signal(&remote, &localbuf, 1, &ps_sig_addr2, 1, SHMEM_SIGNAL_SET, 1);
     }
 
     shmem_barrier_all();

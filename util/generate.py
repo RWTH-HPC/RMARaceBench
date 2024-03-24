@@ -141,6 +141,7 @@ om.add(Model.SHMEM, 'remote_store', 'store', 'STORE', 'store', 'store', 'remote 
 om.add(Model.SHMEM, 'put_remote', 'put', 'shmem_int_put', 'local buffer read', 'rma write',  'int myval = 42;\nshmem_int_put(&remote, &myval, 1, 1);')
 om.add(Model.SHMEM, 'get_remote', 'get', 'shmem_int_get', 'local buffer write', 'rma read', 'shmem_int_get(&localbuf, &remote, 1, 1);')
 om.add(Model.SHMEM, 'put_signal', 'put_signal', 'shmem_int_put_signal', 'local buffer read', 'rma write', 'shmem_int_put_signal(&remote, &localbuf, 1, &ps_sig_addr, 1, SHMEM_SIGNAL_SET, 1);', 'static uint64_t ps_sig_addr = 0;')
+om.add(Model.SHMEM, 'put_signal2', 'put_signal', 'shmem_int_put_signal', 'local buffer read', 'rma write', 'shmem_int_put_signal(&remote, &localbuf, 1, &ps_sig_addr2, 1, SHMEM_SIGNAL_SET, 1);', 'static uint64_t ps_sig_addr2 = 0;')
 om.add(Model.SHMEM, 'put_signal_nbi', 'put_signal_nbi', 'shmem_int_put_signal_nbi', 'local buffer read', 'rma write', 'shmem_int_put_signal_nbi(&remote, &localbuf, 1, &psn_sig_addr, 1, SHMEM_SIGNAL_SET, 1);', 'static uint64_t psn_sig_addr = 0;')
 om.add(Model.SHMEM, 'p', 'p', 'shmem_int_p', '', 'rma write', 'shmem_int_p(&remote, 42, 1);')
 om.add(Model.SHMEM, 'g', 'g', 'shmem_int_g', '', 'rma read', 'localbuf = shmem_int_g(&remote, 1);')
@@ -308,7 +309,7 @@ def gen_conflict_races():
         ],
         Model.SHMEM: [
             (om.get(Model.SHMEM, 'put_signal'), om.get(Model.SHMEM, 'remote_store'), True, 2),
-            (om.get(Model.SHMEM, 'put_signal'), om.get(Model.SHMEM, 'put_signal'), True, 3),
+            (om.get(Model.SHMEM, 'put_signal'), om.get(Model.SHMEM, 'put_signal2'), True, 3),
             (om.get(Model.SHMEM, 'g'), om.get(Model.SHMEM, 'remote_store'), True, 2),
             (om.get(Model.SHMEM, 'g'), om.get(Model.SHMEM, 'put'), True, 3),
             (om.get(Model.SHMEM, 'p'), om.get(Model.SHMEM, 'remote_load'), True, 2),
