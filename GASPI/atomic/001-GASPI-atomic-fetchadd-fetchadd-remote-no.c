@@ -73,10 +73,6 @@ int main(int argc, char* argv[])
 
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 
-    if (rank == 1) {
-        printf("rank 1 value = %lu\n", ((gaspi_atomic_value_t*)remote_data)[0]);
-    }
-
     gaspi_wait(queue_id, GASPI_BLOCK);
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 
