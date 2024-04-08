@@ -82,10 +82,12 @@ int main(int argc, char* argv[])
     // is not enough in some cases), both ranks send a notification to
     // the other rank and wait for the notification from the other rank.
     for (int i = 0; i < num; i++) {
-        gaspi_notify(remote_seg_id, i, rank, rank, queue_id, GASPI_BLOCK);
+        gaspi_notify(remote_seg_id, i, rank, 1, queue_id, GASPI_BLOCK);
     }
-    gaspi_notification_id_t firstId;
-    gaspi_notify_waitsome(remote_seg_id, 0, num, &firstId, GASPI_BLOCK);
+    for (int i = 0; i < num; i++) {
+        gaspi_notification_id_t firstId;
+        gaspi_notify_waitsome(remote_seg_id, i, 1, &firstId, GASPI_BLOCK);
+    }
 
     printf(
         "Process %d: Execution finished, variable contents: localbuf[0] = %d, remote_data[0] = %d\n",
