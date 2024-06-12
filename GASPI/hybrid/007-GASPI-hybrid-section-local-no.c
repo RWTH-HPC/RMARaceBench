@@ -108,5 +108,3 @@ MPI_Finalize();
 
 return EXIT_SUCCESS;
 }
-
-// CHECK-NOT: data race

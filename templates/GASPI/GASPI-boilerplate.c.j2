@@ -107,9 +107,3 @@ int main(int argc, char *argv[])
 
 {% block epilogue %}
 {% endblock epilogue %}
-
-{% if race %}
-// CHECK: data race
-{% else %}
-// CHECK-NOT: data race
-{% endif %}

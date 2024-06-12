@@ -108,5 +108,3 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
-
-// CHECK: data race
