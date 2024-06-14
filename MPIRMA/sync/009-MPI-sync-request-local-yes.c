@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Rget@70","LOAD@72"],
+    "RACE_PAIR": ["MPI_Rget@71","LOAD@73"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations rget and load executed concurrently which leads to a race."
 }
@@ -16,13 +16,13 @@
 // RACE LABELS END
 // RACE_KIND: local
 // ACCESS_SET: [local buffer write,load]
-// RACE_PAIR: [MPI_Rget@70,LOAD@72]
+// RACE_PAIR: [MPI_Rget@71,LOAD@73]
 // RACE LABELS BEGIN
 /*
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Rget@70","LOAD@72"],
+    "RACE_PAIR": ["MPI_Rget@71","LOAD@73"],
     "NPROCS": 2,
     "CONSISTENCY_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
     "SYNC_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
@@ -44,6 +44,7 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
@@ -79,7 +80,7 @@ int main(int argc, char** argv)
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 

@@ -9,7 +9,7 @@
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
     "NPROCS": 2,
-    "RACE_PAIR": ["MPI_Put@56","LOAD@62"],
+    "RACE_PAIR": ["MPI_Put@57","LOAD@63"],
     "CONSISTENCY_CALLS": ["MPI_Win_lock_all","MPI_Win_unlock_all","MPI_Win_flush_all"],
     "SYNC_CALLS": ["MPI_Barrier"],
     "DESCRIPTION": "Two conflicting operations put and load with flush_all (non-collective), but missing synchronization."
@@ -30,6 +30,7 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
@@ -69,7 +70,7 @@ int main(int argc, char** argv)
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 

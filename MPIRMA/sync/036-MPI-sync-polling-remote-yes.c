@@ -12,7 +12,7 @@
     "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
     "SYNC_CALLS": ["MPI_Barrier"],
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Put@59","LOAD@65"],
+    "RACE_PAIR": ["MPI_Put@60","LOAD@66"],
     "DESCRIPTION": "Polling on a window location. This leads to a data race, but is defined behavior according to the MPI standard. However, a race detector should nevertheless detect such a race."
 }
 */
@@ -32,6 +32,7 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
@@ -76,7 +77,7 @@ int main(int argc, char** argv)
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 

@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma read","rma write"],
-    "RACE_PAIR": ["MPI_Get@56","MPI_Put@62"],
+    "RACE_PAIR": ["MPI_Get@57","MPI_Put@63"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations get and put executed concurrently which leads to a race."
 }
@@ -16,7 +16,7 @@
 // RACE LABELS END
 // RACE_KIND: remote
 // ACCESS_SET: [rma read,rma write]
-// RACE_PAIR: [MPI_Get@56,MPI_Put@62]
+// RACE_PAIR: [MPI_Get@57,MPI_Put@63]
 
 #include <mpi.h>
 #include <stdio.h>
@@ -31,6 +31,7 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
@@ -53,13 +54,13 @@ int main(int argc, char** argv)
     if (rank == 0) {
         /* conflicting get and put */
         // CONFLICT
-        MPI_Get(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Get(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
     }
 
     if (rank == 2) {
         value = 2;
         // CONFLICT
-        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
     }
 
     MPI_Win_fence(0, win);
@@ -68,7 +69,7 @@ int main(int argc, char** argv)
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 

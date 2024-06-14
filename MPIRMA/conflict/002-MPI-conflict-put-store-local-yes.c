@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer read","store"],
-    "RACE_PAIR": ["MPI_Put@54","STORE@56"],
+    "RACE_PAIR": ["MPI_Put@55","STORE@57"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations put and store executed concurrently which leads to a race."
 }
@@ -16,7 +16,7 @@
 // RACE LABELS END
 // RACE_KIND: local
 // ACCESS_SET: [local buffer read,store]
-// RACE_PAIR: [MPI_Put@54,STORE@56]
+// RACE_PAIR: [MPI_Put@55,STORE@57]
 
 #include <mpi.h>
 #include <stdio.h>
@@ -31,6 +31,7 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
@@ -51,9 +52,9 @@ int main(int argc, char** argv)
     MPI_Win_fence(0, win);
     if (rank == 0) {
         // CONFLICT
-        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
         // CONFLICT
-        value = 42;
+        *buf = 42;
     }
     MPI_Win_fence(0, win);
 
@@ -61,7 +62,7 @@ int main(int argc, char** argv)
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 

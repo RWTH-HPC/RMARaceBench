@@ -29,6 +29,7 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
@@ -49,7 +50,7 @@ int main(int argc, char** argv)
     MPI_Win_fence(0, win);
     if (rank == 0) {
         MPI_Accumulate(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, MPI_SUM, win);
-        printf("value is %d\n", value);
+        printf("value is %d\n", *buf);
     }
     MPI_Win_fence(0, win);
 
@@ -57,7 +58,7 @@ int main(int argc, char** argv)
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 

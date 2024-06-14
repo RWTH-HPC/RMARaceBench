@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
-    "RACE_PAIR": ["MPI_Put@62","LOAD@75"],
+    "RACE_PAIR": ["MPI_Put@63","LOAD@76"],
     "NPROCS": 2,
     "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
     "SYNC_CALLS": ["MPI_Barrier"],
@@ -31,6 +31,7 @@ int main(int argc, char** argv)
     MPI_Win win;
     int* win_base;
     int value = 1, value2 = 2;
+    int* buf = &value;
     int result;
     int token = 42;
 
@@ -81,7 +82,7 @@ int main(int argc, char** argv)
     printf(
         "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
         rank,
-        value,
+        *buf,
         value2,
         win_base[0]);
 
