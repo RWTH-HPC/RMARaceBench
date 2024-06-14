@@ -1,6 +1,17 @@
 # Changelog
 
+## 1.1.0 - (2024-06-14)
+
+* Add new category 'misc' that adds test cases challenging for static tools
+  * Aliasing between buffers introduced in a function (interprocedural analysis required for detection)
+  * Deeply nested function calls (buffers still have to be attributed correctly by an analysis within the deeply nested function)
+  * Function pointers (difficult to determine statically which function is called)
+  * External function calls that generate aliases (here: memcpy)
+  * The 'misc' tests are currently only generated for MPI RMA.
+* Use pointer variable in MPI RMA test case template (required for some 'misc' test cases)
+
 ## 1.0.3 - (2024-06-12)
+
 * Add missing `unistd` header for sleep functions
 * MPI RMA: Fix wrong race categorization of MPI-atomic-disp-remote-no (was "yes", but should be "no")
 * SHMEM: Avoid conflicting signal address use, fix wrong type of signal address
