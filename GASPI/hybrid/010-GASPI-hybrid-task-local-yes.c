@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["rma read","load"],
-    "RACE_PAIR": ["gaspi_read@89","STORE@96"],
+    "RACE_PAIR": ["gaspi_read@94","STORE@101"],
     "CONSISTENCY_CALLS": ["gaspi_wait"],
     "SYNC_CALLS": ["gaspi_barrier"],
     "NPROCS": 2,
@@ -43,7 +43,12 @@ void my_wait(int* s, int v)
 
 int main(int argc, char* argv[])
 {
-    MPI_Init(&argc, &argv);
+    int provided;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    if (provided < MPI_THREAD_MULTIPLE) {
+        printf("MPI_THREAD_MULTIPLE not supported\n");
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
     gaspi_proc_init(GASPI_BLOCK);
 
     gaspi_rank_t rank;

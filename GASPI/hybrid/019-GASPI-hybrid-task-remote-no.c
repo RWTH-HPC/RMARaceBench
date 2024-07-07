@@ -41,7 +41,12 @@ void my_wait(int* s, int v)
 
 int main(int argc, char* argv[])
 {
-    MPI_Init(&argc, &argv);
+    int provided;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    if (provided < MPI_THREAD_MULTIPLE) {
+        printf("MPI_THREAD_MULTIPLE not supported\n");
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
     gaspi_proc_init(GASPI_BLOCK);
 
     gaspi_rank_t rank;

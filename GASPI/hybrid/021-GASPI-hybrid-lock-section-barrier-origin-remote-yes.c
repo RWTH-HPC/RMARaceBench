@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
-    "RACE_PAIR": ["gaspi_read@72","STORE@88"],
+    "RACE_PAIR": ["gaspi_read@77","STORE@93"],
     "CONSISTENCY_CALLS": ["gaspi_wait"],
     "SYNC_CALLS": ["gaspi_barrier"],
     "NPROCS": 2,
@@ -27,7 +27,12 @@
 
 int main(int argc, char* argv[])
 {
-    MPI_Init(&argc, &argv);
+    int provided;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    if (provided < MPI_THREAD_MULTIPLE) {
+        printf("MPI_THREAD_MULTIPLE not supported\n");
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
     gaspi_proc_init(GASPI_BLOCK);
 
     gaspi_rank_t rank;
