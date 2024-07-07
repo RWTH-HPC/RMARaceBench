@@ -5,10 +5,10 @@
 /*
 {
     "RACE_KIND": "none",
-    "CONSISTENCY_CALLS": ["gaspi_wait"],
-    "SYNC_CALLS": ["gaspi_barrier"],
+    "CONSISTENCY_CALLS": ["gaspi_wait","gaspi_notify_waitsome"],
+    "SYNC_CALLS": ["gaspi_notify_waitsome"],
     "NPROCS": 2,
-    "DESCRIPTION": "Two conflicting operations gaspi_read and a local store with synchronization at process 1. The OpenMP barrier enforces that all threads of the target synchronize with the origin."
+    "DESCRIPTION": "Two conflicting operations gaspi_write_notify and a local read with synchronization at process 1. The OpenMP barrier enforces that all threads of the target synchronize with the origin."
 }
 */
 // RACE LABELS END
@@ -20,9 +20,8 @@
 {% block main %}
 
     if (rank == 0) {
-        gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
+        gaspi_write_notify(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), 0, 1, queue_id, GASPI_BLOCK);
         gaspi_wait(queue_id, GASPI_BLOCK);
-        gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
     }
 
     if (rank == 1) {
@@ -30,10 +29,11 @@
         {
             #pragma omp master
             {
-                gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+                gaspi_notification_id_t firstId;
+                gaspi_notify_waitsome(remote_seg_id, 0, 1, &firstId, GASPI_BLOCK);
             }
             #pragma omp barrier
-            remote_data[0] = 42;
+            printf("remote_data[0] is %d\n", remote_data[0]);
     }
 
     }
