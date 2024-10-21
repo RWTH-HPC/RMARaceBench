@@ -4,20 +4,21 @@
 {% endblock preamble %}
 
 {%- block additional_declarations %}
+#include <string.h>
 
 void rank0(int* buf, MPI_Win win, int* win_base) {
     {%- if race %}
     /* conflicting {{ op1.name }} and {{ op2.name }} */
     // CONFLICT
     {%- endif %}
-    {{ op1.code }}
+    {{ op1.code.replace('&value','buf').replace('value','*buf') }}
 }
 
 void rank1(int* buf, MPI_Win win, int* win_base) {
     {%- if race %}
     // CONFLICT
     {%- endif %}
-    {{ op2.code }}
+    {{ op2.code.replace('&value','buf').replace('value','*buf') }}
 }
 
 {% endblock additional_declarations %}

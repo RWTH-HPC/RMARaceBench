@@ -26,7 +26,7 @@ __attribute__((noinline)) void aliasgenerator(int** x, int** y) {
         /* conflicting {{ op1.name }} and {{ op2.name }} */
         // CONFLICT
         {%- endif %}
-        {{ op1.code.replace('buf','buf_alias').replace('win_base','win_base_alias') }}
+        {{ op1.code.replace('&value','buf').replace('value','*buf').replace('buf','buf_alias').replace('win_base','win_base_alias') }}
         {%- if race %}
         // CONFLICT
         {%- endif %}
