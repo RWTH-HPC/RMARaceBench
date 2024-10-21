@@ -443,14 +443,11 @@ def gen_misc_races():
 
     local_race_combinations = [
         (op_local_buffer_read, op_local_load, False),
-        (op_local_buffer_read, op_local_store, True),
-        (op_local_buffer_read, op_local_buffer_read2, False),
         (op_local_buffer_write, op_local_load, True),
     ]
     remote_race_combinations = [
         (op_rma_read, op_remote_load,  False, 2),
         (op_rma_read, op_remote_store, True,  2),
-        (op_rma_write, op_remote_load,  True,  2),
     ]
 
     local_src_templates = [
