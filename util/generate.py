@@ -102,13 +102,13 @@ class OperationManager:
 
 
 om = OperationManager()
-om.add(Model.MPIRMA, 'local_load', 'load', 'LOAD', 'load', 'load', 'printf("value is %d\\n", *buf);')
-om.add(Model.MPIRMA, 'local_store', 'store', 'STORE', 'store', 'store', '*buf = 42;')
-om.add(Model.MPIRMA, 'put', 'put', 'MPI_Put', 'local buffer read', 'rma write', 'MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);')
-om.add(Model.MPIRMA, 'put2', 'put', 'MPI_Put', 'local buffer read', 'rma write', 'MPI_Put(buf, 1, MPI_INT, 1, 1, 1, MPI_INT, win);')
+om.add(Model.MPIRMA, 'local_load', 'load', 'LOAD', 'load', 'load', 'printf("value is %d\\n", value);')
+om.add(Model.MPIRMA, 'local_store', 'store', 'STORE', 'store', 'store', 'value = 42;')
+om.add(Model.MPIRMA, 'put', 'put', 'MPI_Put', 'local buffer read', 'rma write', 'MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);')
+om.add(Model.MPIRMA, 'put2', 'put', 'MPI_Put', 'local buffer read', 'rma write', 'MPI_Put(&value, 1, MPI_INT, 1, 1, 1, MPI_INT, win);')
 om.add(Model.MPIRMA, 'acc', 'acc', 'MPI_Accumulate', 'local buffer read', 'rma atomic write', 'MPI_Accumulate(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, MPI_SUM, win);')
 om.add(Model.MPIRMA, 'acc2', 'acc', 'MPI_Accumulate', 'local buffer read', 'rma atomic write', 'MPI_Accumulate(&value, 1, MPI_INT, 1, 1, 1, MPI_INT, MPI_SUM, win);')
-om.add(Model.MPIRMA, 'get', 'get', 'MPI_Get', 'local buffer write', 'rma read', 'MPI_Get(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);')
+om.add(Model.MPIRMA, 'get', 'get', 'MPI_Get', 'local buffer write', 'rma read', 'MPI_Get(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);')
 om.add(Model.MPIRMA, 'remote_load', 'load', 'LOAD', 'load', 'load', 'printf("win_base[0] is %d\\n", win_base[0]);')
 om.add(Model.MPIRMA, 'remote_store', 'store', 'STORE', 'store', 'store', 'win_base[0] = 42;')
 om.add(Model.MPIRMA, 'rget', 'rget','MPI_Rget', 'local buffer write', 'rma read', 'MPI_Rget(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win, &req);')
