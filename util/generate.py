@@ -716,7 +716,7 @@ def printStaticstics():
         for discipline in ['conflict', 'sync', 'atomic', 'hybrid', 'misc']:
             total.set(model, total.get(model) + caseCounters[discipline].get(model))
             total.set_races(model, total.get_races(model) + caseCounters[discipline].get_races(model))
-    print('\midrule')
+    print('\\midrule')
     printCases(f'{"Total": <16}', total)
 
 printStaticstics()
