@@ -1,0 +1,31 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{%- block additional_declarations %}
+#include <string.h>
+{% endblock additional_declarations %}
+
+{% block main %}
+
+    int* localbuf_alias;
+    int* remote_data_alias;
+
+    memcpy(&localbuf_alias, &localbuf, sizeof(int*));
+    memcpy(&remote_data_alias, &remote_data, sizeof(int*));
+
+    if (rank == 0) {
+        {%- if race %}
+        /* conflicting {{ op1.name }} and {{ op2.name }} */
+        // CONFLICT
+        {%- endif %}
+        {{ op1.code }}
+        {%- if race %}
+        // CONFLICT
+        {%- endif %}
+        {{ op2.code }}
+    }
+
+
+{% endblock main %}

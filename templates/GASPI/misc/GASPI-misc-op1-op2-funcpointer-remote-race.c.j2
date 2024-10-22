@@ -1,0 +1,37 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{%- block additional_declarations %}
+#include <string.h>
+
+void rank0(gaspi_segment_id_t loc_seg_id, gaspi_segment_id_t remote_seg_id, gaspi_queue_id_t queue_id, int* localbuf, int* remote_data) {
+    {%- if race %}
+    /* conflicting {{ op1.name }} and {{ op2.name }} */
+    // CONFLICT
+    {%- endif %}
+    {{ op1.code }}
+}
+
+void rank1(gaspi_segment_id_t loc_seg_id, gaspi_segment_id_t remote_seg_id, gaspi_queue_id_t queue_id, int* localbuf, int* remote_data) {
+    {%- if race %}
+    // CONFLICT
+    {%- endif %}
+    {{ op2.code }}
+}
+
+{% endblock additional_declarations %}
+
+{% block main %}
+
+    void (*rankfunc)(gaspi_segment_id_t loc_seg_id, gaspi_segment_id_t remote_seg_id, gaspi_queue_id_t queue_id, int* localbuf, int* remote_data);
+
+    if (rank == 0) {
+        rankfunc = rank0;
+    } else {
+        rankfunc = rank1;
+    }
+    (*rankfunc)(loc_seg_id, remote_seg_id, queue_id, localbuf, remote_data);
+
+{% endblock main %}

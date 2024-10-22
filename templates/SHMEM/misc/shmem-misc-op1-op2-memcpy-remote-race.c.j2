@@ -1,0 +1,37 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{%- block additional_declarations %}
+#include <string.h>
+{% endblock additional_declarations %}
+
+{% block main %}
+
+    shmem_barrier_all();
+
+    int* rem_ptr = &remote;
+    int* lbuf_ptr = &localbuf;
+    int* rem_ptr_alias;
+    int* lbuf_ptr_alias;
+
+    memcpy(&rem_ptr_alias, &rem_ptr, sizeof(int*));
+    memcpy(&lbuf_ptr_alias, &lbuf_ptr, sizeof(int*));
+
+    if (my_pe == 0) {
+        {%- if race %}
+        /* conflicting {{ op1.name }} and {{ op2.name }} */
+        // CONFLICT
+        {%- endif %}
+        {{ op1.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr').replace('rem_ptr','rem_ptr_alias').replace('lbuf_ptr','lbuf_ptr_alias') }}
+    } else {
+        {%- if race %}
+        // CONFLICT
+        {%- endif %}
+        {{ op2.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr').replace('rem_ptr','rem_ptr_alias').replace('lbuf_ptr','lbuf_ptr_alias') }}
+    }
+
+    shmem_barrier_all();
+
+{% endblock main %}

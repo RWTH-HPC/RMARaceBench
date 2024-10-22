@@ -1,0 +1,41 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{%- block additional_declarations %}
+
+__attribute__((noinline)) void deeeeeeeeep(int* remote_data) {
+    {%- if race %}
+    /* conflicting {{ op1.name }} and {{ op2.name }} */
+    // CONFLICT
+    {%- endif %}
+    {{ op2.code }}
+}
+
+__attribute__((noinline)) void deeeeeeeep(int* remote_data) { deeeeeeeeep(remote_data); }
+__attribute__((noinline)) void deeeeeeep(int* remote_data) { deeeeeeeep(remote_data); }
+__attribute__((noinline)) void deeeeeep(int* remote_data) { deeeeeeep(remote_data); }
+__attribute__((noinline)) void deeeeep(int* remote_data) { deeeeeep(remote_data); }
+__attribute__((noinline)) void deeeep(int* remote_data) { deeeeep(remote_data); }
+__attribute__((noinline)) void deeep(int* remote_data) { deeeep(remote_data); }
+__attribute__((noinline)) void deep(int* remote_data) { deeep(remote_data); }
+
+void rank0(gaspi_segment_id_t loc_seg_id, gaspi_segment_id_t remote_seg_id, gaspi_queue_id_t queue_id, int* localbuf, int* remote_data) {
+    deep(remote_data);
+}
+
+{% endblock additional_declarations %}
+
+{% block main %}
+
+    if (rank == 0) {
+        rank0(loc_seg_id, remote_seg_id, queue_id, localbuf, remote_data);
+    } else {
+        {%- if race %}
+        // CONFLICT
+        {%- endif %}
+        {{ op1.code }}
+    }
+
+{% endblock main %}

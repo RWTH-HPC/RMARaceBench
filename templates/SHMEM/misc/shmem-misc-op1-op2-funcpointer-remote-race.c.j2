@@ -1,0 +1,42 @@
+{% extends "templates/SHMEM/shmem-boilerplate.c.j2" %}
+
+{% block preamble %}
+{% endblock preamble %}
+
+{%- block additional_declarations %}
+
+void rank0(int* rem_ptr, int* lbuf_ptr) {
+    {%- if race %}
+    /* conflicting {{ op1.name }} and {{ op2.name }} */
+    // CONFLICT
+    {%- endif %}
+    {{ op1.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr') }}
+}
+
+void rank1(int* rem_ptr, int* lbuf_ptr) {
+    {%- if race %}
+    // CONFLICT
+    {%- endif %}
+    {{ op2.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr') }}
+}
+
+{% endblock additional_declarations %}
+
+{% block main %}
+    int* rem_ptr = &remote;
+    int* lbuf_ptr = &localbuf;
+
+    void (*rankfunc)(int* rem_ptr, int* lbuf_ptr);
+
+    shmem_barrier_all();
+
+    if (my_pe == 0) {
+        rankfunc = rank0;
+    } else {
+        rankfunc = rank1;
+    }
+    (*rankfunc)(rem_ptr, lbuf_ptr);
+
+    shmem_barrier_all();
+
+{% endblock main %}

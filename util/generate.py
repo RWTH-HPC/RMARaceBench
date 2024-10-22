@@ -450,40 +450,62 @@ def gen_misc_races():
         (op_rma_read, op_remote_store, True,  2),
     ]
 
-    local_src_templates = [
+    local_src_templates = {Model.MPIRMA: [
             SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-deep-nesting-local-race.c.j2", 2,  [], local_race_combinations), 
             SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-aliasing-local-race.c.j2", 2,  [], local_race_combinations),
             SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-retval-local-race.c.j2", 2,  [], local_race_combinations),
-            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-memcpy-local-race.c.j2", 2,  [], local_race_combinations),
-    ]
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-memcpy-local-race.c.j2", 2,  [], local_race_combinations)
+            ],
+            Model.SHMEM: [
+            SourceTemplate("templates/SHMEM/misc/shmem-misc-op1-op2-deep-nesting-local-race.c.j2", 2,  [], local_race_combinations), 
+            SourceTemplate("templates/SHMEM/misc/shmem-misc-op1-op2-aliasing-local-race.c.j2", 2,  [], local_race_combinations),
+            SourceTemplate("templates/SHMEM/misc/shmem-misc-op1-op2-retval-local-race.c.j2", 2,  [], local_race_combinations),
+            SourceTemplate("templates/SHMEM/misc/shmem-misc-op1-op2-memcpy-local-race.c.j2", 2,  [], local_race_combinations)
+            ],
+            Model.GASPI: [
+            SourceTemplate("templates/GASPI/misc/GASPI-misc-op1-op2-deep-nesting-local-race.c.j2", 2,  [], local_race_combinations), 
+            SourceTemplate("templates/GASPI/misc/GASPI-misc-op1-op2-aliasing-local-race.c.j2", 2,  [], local_race_combinations),
+            SourceTemplate("templates/GASPI/misc/GASPI-misc-op1-op2-retval-local-race.c.j2", 2,  [], local_race_combinations),
+            SourceTemplate("templates/GASPI/misc/GASPI-misc-op1-op2-memcpy-local-race.c.j2", 2,  [], local_race_combinations)
+            ],
+    }
 
-    remote_src_templates = [
+    remote_src_templates = {Model.MPIRMA: [
             SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-deep-nesting-remote-race.c.j2", 2, [], remote_race_combinations),
             SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-funcpointer-remote-race.c.j2", 2,  [], remote_race_combinations), 
             SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-aliasing-remote-race.c.j2", 2,  [], remote_race_combinations),
             SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-retval-remote-race.c.j2", 2,  [], remote_race_combinations),
-            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-memcpy-remote-race.c.j2", 2,  [], remote_race_combinations),
-    ]
+            SourceTemplate("templates/MPIRMA/misc/MPI-misc-op1-op2-memcpy-remote-race.c.j2", 2,  [], remote_race_combinations)
+            ],
+            Model.SHMEM: [
+            SourceTemplate("templates/SHMEM/misc/shmem-misc-op1-op2-deep-nesting-remote-race.c.j2", 2, [], remote_race_combinations),
+            SourceTemplate("templates/SHMEM/misc/shmem-misc-op1-op2-funcpointer-remote-race.c.j2", 2,  [], remote_race_combinations), 
+            SourceTemplate("templates/SHMEM/misc/shmem-misc-op1-op2-aliasing-remote-race.c.j2", 2,  [], remote_race_combinations),
+            SourceTemplate("templates/SHMEM/misc/shmem-misc-op1-op2-retval-remote-race.c.j2", 2,  [], remote_race_combinations),
+            SourceTemplate("templates/SHMEM/misc/shmem-misc-op1-op2-memcpy-remote-race.c.j2", 2,  [], remote_race_combinations)
+            ],
+            Model.GASPI: [
+            SourceTemplate("templates/GASPI/misc/GASPI-misc-op1-op2-deep-nesting-remote-race.c.j2", 2, [], remote_race_combinations),
+            SourceTemplate("templates/GASPI/misc/GASPI-misc-op1-op2-funcpointer-remote-race.c.j2", 2,  [], remote_race_combinations), 
+            SourceTemplate("templates/GASPI/misc/GASPI-misc-op1-op2-aliasing-remote-race.c.j2", 2,  [], remote_race_combinations),
+            SourceTemplate("templates/GASPI/misc/GASPI-misc-op1-op2-retval-remote-race.c.j2", 2,  [], remote_race_combinations),
+            SourceTemplate("templates/GASPI/misc/GASPI-misc-op1-op2-memcpy-remote-race.c.j2", 2,  [], remote_race_combinations)
+            ],
+    }
 
     for (ops1, ops2, has_race) in local_race_combinations:
-        generated_combos = set()
-        for op1 in ops1['MPIRMA']:
-            for op2 in ops2['MPIRMA']:
-                if tuple(sorted([op1.name, op2.name])) in generated_combos:
-                    continue
-                generated_combos.add(tuple(sorted([op1.name, op2.name])))
-                for template in local_src_templates:
-                    render_template(template.filename, caseCounters['misc'].inc_get('MPIRMA', has_race), 'MPIRMA', op1, op2, has_race, template.nprocs)
+        for model in Model:
+            for op1 in ops1[model]:
+                for op2 in ops2[model]:
+                    for template in local_src_templates[model]:
+                        render_template(template.filename, caseCounters['misc'].inc_get(model, has_race), model, op1, op2, has_race, template.nprocs)
 
     for (ops1, ops2, has_race, nprocs) in remote_race_combinations:
-        generated_combos = set()
-        for op1 in ops1['MPIRMA']:
-            for op2 in ops2['MPIRMA']:
-                if tuple(sorted([op1.name, op2.name])) in generated_combos:
-                    continue
-                generated_combos.add(tuple(sorted([op1.name, op2.name])))
-                for template in remote_src_templates:
-                    render_template(template.filename, caseCounters['misc'].inc_get('MPIRMA', has_race), 'MPIRMA', op1, op2, has_race, nprocs)
+        for model in Model:
+            for op1 in ops1[model]:
+                for op2 in ops2[model]:
+                    for template in remote_src_templates[model]:
+                        render_template(template.filename, caseCounters['misc'].inc_get(model, has_race), model, op1, op2, has_race, nprocs)
 
 
 def gen_sync_races():
