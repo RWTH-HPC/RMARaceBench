@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     aliasgenerator(&lbuf_ptr, &lbuf_ptr_alias);
 
     if (my_pe == 0) {
-        shmem_int_get(lbuf_ptr_alias, rem_ptr_alias, 1, 1);
+        shmem_int_get(lbuf_ptr, rem_ptr, 1, 1);
     } else {
         printf("*rem_ptr_alias is %d", *rem_ptr_alias);
     }

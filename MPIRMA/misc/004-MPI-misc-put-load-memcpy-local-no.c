@@ -56,7 +56,7 @@ int main(int argc, char** argv)
     memcpy(&win_base_alias, &win_base, sizeof(int*));
 
     if (rank == 0) {
-        MPI_Put(buf_alias, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
         printf("*buf_alias is %d\n", *buf_alias);
     }
 

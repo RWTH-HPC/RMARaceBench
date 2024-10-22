@@ -67,7 +67,6 @@ int main(int argc, char* argv[])
     if (rank == 0) {
         gaspi_write(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
         printf("localbuf[0] is %d\n", localbuf[0]);
-        gaspi_wait(queue_id, GASPI_BLOCK);
     }
 
     gaspi_wait(queue_id, GASPI_BLOCK);

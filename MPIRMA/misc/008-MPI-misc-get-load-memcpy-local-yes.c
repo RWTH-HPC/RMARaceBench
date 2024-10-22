@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     if (rank == 0) {
         /* conflicting get and load */
         // CONFLICT
-        MPI_Get(buf_alias, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Get(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
         // CONFLICT
         printf("*buf_alias is %d\n", *buf_alias);
     }

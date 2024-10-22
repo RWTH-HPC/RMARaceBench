@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     if (my_pe == 0) {
         /* conflicting get and store */
         // CONFLICT
-        shmem_int_get(lbuf_ptr_alias, rem_ptr_alias, 1, 1);
+        shmem_int_get(lbuf_ptr, rem_ptr, 1, 1);
     } else {
         // CONFLICT
         *rem_ptr_alias = 42;

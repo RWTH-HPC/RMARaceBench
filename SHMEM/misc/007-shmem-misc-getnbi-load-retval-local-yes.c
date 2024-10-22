@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     if (my_pe == 0) {
         /* conflicting getnbi and load */
         // CONFLICT
-        shmem_int_get_nbi(lbuf_ptr_alias, rem_ptr_alias, 1, 1);
+        shmem_int_get_nbi(lbuf_ptr, rem_ptr, 1, 1);
         // CONFLICT
         printf("*lbuf_ptr_alias is %d\n", *lbuf_ptr_alias);
     }

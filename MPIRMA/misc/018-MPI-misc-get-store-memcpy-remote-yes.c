@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     if (rank == 0) {
         /* conflicting get and store */
         // CONFLICT
-        MPI_Get(buf_alias, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Get(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
     } else {
         // CONFLICT
         win_base_alias[0] = 42;

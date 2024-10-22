@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     win_base_alias = aliasgenerator(&win_base);
 
     if (rank == 0) {
-        MPI_Get(buf_alias, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Get(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
     } else {
         printf("win_base_alias[0] is %d\n", win_base_alias[0]);
     }

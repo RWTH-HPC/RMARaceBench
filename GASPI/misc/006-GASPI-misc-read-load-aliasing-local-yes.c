@@ -71,7 +71,6 @@ int main(int argc, char* argv[])
         gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
         // CONFLICT
         printf("localbuf[0] is %d\n", localbuf[0]);
-        gaspi_wait(queue_id, GASPI_BLOCK);
     }
 
     gaspi_wait(queue_id, GASPI_BLOCK);
