@@ -22,12 +22,12 @@
         /* conflicting {{ op1.name }} and {{ op2.name }} */
         // CONFLICT
         {%- endif %}
-        {{ op1.code.replace('&value','buf').replace('value','*buf').replace('buf','buf_alias').replace('win_base','win_base_alias') }}
+        {{ replace_with_aliases(op1) }}
     } else {
         {%- if race %}
         // CONFLICT
         {%- endif %}
-        {{ op2.code.replace('&value','buf').replace('value','*buf').replace('buf','buf_alias').replace('win_base','win_base_alias') }}
+        {{ replace_with_aliases(op2) }}
     }
 
     MPI_Win_fence(0, win);

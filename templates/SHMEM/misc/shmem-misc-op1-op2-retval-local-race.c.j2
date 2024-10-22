@@ -28,11 +28,11 @@ __attribute__((noinline)) int* aliasgenerator(int** x) {
         /* conflicting {{ op1.name }} and {{ op2.name }} */
         // CONFLICT
         {%- endif %}
-        {{ op1.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr').replace('rem_ptr','rem_ptr_alias').replace('lbuf_ptr','lbuf_ptr_alias') }}
+        {{ replace_with_aliases(op1) }}
         {%- if race %}
         // CONFLICT
         {%- endif %}
-        {{ op2.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr').replace('rem_ptr','rem_ptr_alias').replace('lbuf_ptr','lbuf_ptr_alias') }}
+        {{ replace_with_aliases(op2) }}
     }
 
     shmem_barrier_all();

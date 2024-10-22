@@ -32,6 +32,18 @@
 {%- block preamble %}
 {% endblock preamble%}
 
+{%- macro replace_with_aliases(op) -%}
+    {%- if op.name in ['store', 'load'] -%}
+        {{ op.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr').replace('rem_ptr','rem_ptr_alias').replace('lbuf_ptr','lbuf_ptr_alias') }}
+    {%- else -%}
+        {{ op.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr') }}
+    {%- endif -%}
+{%- endmacro %}
+
+{%- macro replace_with_buffers(op) -%}
+    {{ op.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr') }}
+{%- endmacro %}
+
 #include <shmem.h>
 #include <stdio.h>
 

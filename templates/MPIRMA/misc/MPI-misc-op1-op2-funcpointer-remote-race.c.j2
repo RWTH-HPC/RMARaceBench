@@ -11,14 +11,14 @@ void rank0(int* buf, MPI_Win win, int* win_base) {
     /* conflicting {{ op1.name }} and {{ op2.name }} */
     // CONFLICT
     {%- endif %}
-    {{ op1.code.replace('&value','buf').replace('value','*buf') }}
+    {{ replace_with_buffers(op1) }}
 }
 
 void rank1(int* buf, MPI_Win win, int* win_base) {
     {%- if race %}
     // CONFLICT
     {%- endif %}
-    {{ op2.code.replace('&value','buf').replace('value','*buf') }}
+    {{ replace_with_buffers(op2) }}
 }
 
 {% endblock additional_declarations %}

@@ -10,14 +10,14 @@ void rank0(int* rem_ptr, int* lbuf_ptr) {
     /* conflicting {{ op1.name }} and {{ op2.name }} */
     // CONFLICT
     {%- endif %}
-    {{ op1.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr') }}
+    {{ replace_with_buffers(op1) }}
 }
 
 void rank1(int* rem_ptr, int* lbuf_ptr) {
     {%- if race %}
     // CONFLICT
     {%- endif %}
-    {{ op2.code.replace('&remote','rem_ptr').replace('remote','*rem_ptr').replace('&localbuf','lbuf_ptr').replace('localbuf','*lbuf_ptr') }}
+    {{ replace_with_buffers(op2) }}
 }
 
 {% endblock additional_declarations %}

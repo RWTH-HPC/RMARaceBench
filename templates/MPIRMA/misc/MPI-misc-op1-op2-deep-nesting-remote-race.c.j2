@@ -10,7 +10,7 @@ __attribute__((noinline)) void deeeeeeeeep(int* buf, MPI_Win win) {
     /* conflicting {{ op1.name }} and {{ op2.name }} */
     // CONFLICT
     {%- endif %}
-    {{ op1.code.replace('&value','buf').replace('value','*buf') }}
+    {{ replace_with_buffers(op1) }}
 }
 
 __attribute__((noinline)) void deeeeeeeep(int* buf, MPI_Win win) { deeeeeeeeep(buf,win); }
@@ -36,7 +36,7 @@ void rank0(int* buf, MPI_Win win) {
         {%- if race %}
         // CONFLICT
         {%- endif %}
-        {{ op2.code.replace('&value','buf').replace('value','*buf') }}
+        {{ replace_with_buffers(op2) }}
     }
     MPI_Win_fence(0, win);
 

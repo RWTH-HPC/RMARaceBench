@@ -46,6 +46,18 @@
 {%- block preamble %}
 {% endblock preamble%}
 
+{%- macro replace_with_aliases(op) -%}
+    {%- if op.name in ['store', 'load'] -%}
+        {{ op.code.replace('&value','buf').replace('value','*buf').replace('buf','buf_alias').replace('win_base','win_base_alias') }}
+    {%- else -%}
+        {{ op.code.replace('&value','buf').replace('value','*buf') }}
+    {%- endif -%}
+{%- endmacro %}
+
+{%- macro replace_with_buffers(op) -%}
+    {{ op.code.replace('&value','buf').replace('value','*buf') }}
+{%- endmacro %}
+
 
 #include <mpi.h>
 #include <stdio.h>
