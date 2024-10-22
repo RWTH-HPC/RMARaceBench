@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Get_accumulate@55","LOAD@57"],
+    "RACE_PAIR": ["MPI_Get_accumulate@54","LOAD@56"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations gacc and load executed concurrently which leads to a race."
 }
@@ -16,11 +16,10 @@
 // RACE LABELS END
 // RACE_KIND: local
 // ACCESS_SET: [local buffer write,load]
-// RACE_PAIR: [MPI_Get_accumulate@55,LOAD@57]
+// RACE_PAIR: [MPI_Get_accumulate@54,LOAD@56]
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -54,7 +53,7 @@ int main(int argc, char** argv)
         // CONFLICT
         MPI_Get_accumulate(&value2, 1, MPI_INT, &value, 1, MPI_INT, 1, 0, 1, MPI_INT, MPI_SUM, win);
         // CONFLICT
-        printf("value is %d\n", *buf);
+        printf("value is %d\n", value);
     }
     MPI_Win_fence(0, win);
 

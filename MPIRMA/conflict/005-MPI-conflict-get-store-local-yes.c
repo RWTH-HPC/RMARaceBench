@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","store"],
-    "RACE_PAIR": ["MPI_Get@55","STORE@57"],
+    "RACE_PAIR": ["MPI_Get@54","STORE@56"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations get and store executed concurrently which leads to a race."
 }
@@ -16,11 +16,10 @@
 // RACE LABELS END
 // RACE_KIND: local
 // ACCESS_SET: [local buffer write,store]
-// RACE_PAIR: [MPI_Get@55,STORE@57]
+// RACE_PAIR: [MPI_Get@54,STORE@56]
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -52,9 +51,9 @@ int main(int argc, char** argv)
     MPI_Win_fence(0, win);
     if (rank == 0) {
         // CONFLICT
-        MPI_Get(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Get(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
         // CONFLICT
-        *buf = 42;
+        value = 42;
     }
     MPI_Win_fence(0, win);
 

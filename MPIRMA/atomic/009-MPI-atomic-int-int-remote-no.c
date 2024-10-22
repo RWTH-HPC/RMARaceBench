@@ -18,7 +18,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 3
 #define WIN_SIZE 10

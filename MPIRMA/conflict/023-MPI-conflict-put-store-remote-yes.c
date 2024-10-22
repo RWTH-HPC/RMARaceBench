@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","store"],
-    "RACE_PAIR": ["MPI_Put@57","STORE@62"],
+    "RACE_PAIR": ["MPI_Put@56","STORE@61"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations put and store executed concurrently which leads to a race."
 }
@@ -16,11 +16,10 @@
 // RACE LABELS END
 // RACE_KIND: remote
 // ACCESS_SET: [rma write,store]
-// RACE_PAIR: [MPI_Put@57,STORE@62]
+// RACE_PAIR: [MPI_Put@56,STORE@61]
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -54,7 +53,7 @@ int main(int argc, char** argv)
     if (rank == 0) {
         /* conflicting put and store */
         // CONFLICT
-        MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
     }
 
     if (rank == 1) {

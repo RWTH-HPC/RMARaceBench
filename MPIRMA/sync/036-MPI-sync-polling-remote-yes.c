@@ -12,7 +12,7 @@
     "CONSISTENCY_CALLS": ["MPI_Win_lock,MPI_Win_unlock"],
     "SYNC_CALLS": ["MPI_Barrier"],
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Put@60","LOAD@66"],
+    "RACE_PAIR": ["MPI_Put@59","LOAD@65"],
     "DESCRIPTION": "Polling on a window location. This leads to a data race, but is defined behavior according to the MPI standard. However, a race detector should nevertheless detect such a race."
 }
 */
@@ -20,7 +20,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
 #define PROC_NUM 2

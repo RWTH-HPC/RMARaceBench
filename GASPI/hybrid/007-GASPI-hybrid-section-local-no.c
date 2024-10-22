@@ -68,48 +68,49 @@ int main(int argc, char* argv[])
 #pragma omp sections
             {
 #pragma omp section
-                {gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
-            gaspi_wait(queue_id, GASPI_BLOCK);
-        }
-    }
+                {
+                    gaspi_read(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), queue_id, GASPI_BLOCK);
+                    gaspi_wait(queue_id, GASPI_BLOCK);
+                }
+            }
 
 #pragma omp sections
-    {
+            {
 #pragma omp section
-        printf("localbuf[0] is %d\n", localbuf[0]);
+                printf("localbuf[0] is %d\n", localbuf[0]);
+            }
+        }
+        gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
     }
-}
-gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
-}
 
-if (rank == 1) {
+    if (rank == 1) {
+        gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+        printf("remote_data[0] is %d\n", remote_data[0]);
+    }
+
+    gaspi_wait(queue_id, GASPI_BLOCK);
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
-    printf("remote_data[0] is %d\n", remote_data[0]);
-}
 
-gaspi_wait(queue_id, GASPI_BLOCK);
-gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+    // ensure synchronization between all ranks by using notifications
+    // to avoid race with printf statement (gaspi_wait + gaspi_barrier
+    // is not enough in some cases), both ranks send a notification to
+    // the other rank and wait for the notification from the other rank.
+    for (int i = 0; i < num; i++) {
+        gaspi_notify(remote_seg_id, i, rank, 1, queue_id, GASPI_BLOCK);
+    }
+    for (int i = 0; i < num; i++) {
+        gaspi_notification_id_t firstId;
+        gaspi_notify_waitsome(remote_seg_id, i, 1, &firstId, GASPI_BLOCK);
+    }
 
-// ensure synchronization between all ranks by using notifications
-// to avoid race with printf statement (gaspi_wait + gaspi_barrier
-// is not enough in some cases), both ranks send a notification to
-// the other rank and wait for the notification from the other rank.
-for (int i = 0; i < num; i++) {
-    gaspi_notify(remote_seg_id, i, rank, 1, queue_id, GASPI_BLOCK);
-}
-for (int i = 0; i < num; i++) {
-    gaspi_notification_id_t firstId;
-    gaspi_notify_waitsome(remote_seg_id, i, 1, &firstId, GASPI_BLOCK);
-}
+    printf(
+        "Process %d: Execution finished, variable contents: localbuf[0] = %d, remote_data[0] = %d\n",
+        rank,
+        localbuf[0],
+        remote_data[0]);
+    gaspi_proc_term(GASPI_BLOCK);
 
-printf(
-    "Process %d: Execution finished, variable contents: localbuf[0] = %d, remote_data[0] = %d\n",
-    rank,
-    localbuf[0],
-    remote_data[0]);
-gaspi_proc_term(GASPI_BLOCK);
+    MPI_Finalize();
 
-MPI_Finalize();
-
-return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

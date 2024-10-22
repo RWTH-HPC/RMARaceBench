@@ -18,7 +18,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 __attribute__((noinline)) void aliasgenerator(int** x, int** y) { *y = *x; }
 
@@ -59,7 +58,7 @@ int main(int argc, char** argv)
 
     if (rank == 0) {
         MPI_Put(buf_alias, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
-        printf("value is %d\n", *buf_alias);
+        printf("value is %d\n", value);
     }
 
     MPI_Win_fence(0, win);

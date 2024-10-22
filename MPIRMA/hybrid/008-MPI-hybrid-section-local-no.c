@@ -17,7 +17,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -59,36 +58,37 @@ int main(int argc, char** argv)
 #pragma omp sections
             {
 #pragma omp section
-                {MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
-            MPI_Get(&win_base[0], 1, MPI_INT, 1, 0, 1, MPI_INT, win);
-            MPI_Win_unlock(1, win);
-        }
-    }
+                {
+                    MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, win);
+                    MPI_Get(&win_base[0], 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+                    MPI_Win_unlock(1, win);
+                }
+            }
 
 #pragma omp sections
-    {
+            {
 #pragma omp section
+                printf("win_base[0] is %d\n", win_base[0]);
+            }
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+
+    if (rank == 1) {
+        MPI_Barrier(MPI_COMM_WORLD);
         printf("win_base[0] is %d\n", win_base[0]);
     }
-}
-MPI_Barrier(MPI_COMM_WORLD);
-}
 
-if (rank == 1) {
     MPI_Barrier(MPI_COMM_WORLD);
-    printf("win_base[0] is %d\n", win_base[0]);
-}
+    printf(
+        "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
+        rank,
+        *buf,
+        value2,
+        win_base[0]);
 
-MPI_Barrier(MPI_COMM_WORLD);
-printf(
-    "Process %d: Execution finished, variable contents: value = %d, value2 = %d, win_base[0] = %d\n",
-    rank,
-    *buf,
-    value2,
-    win_base[0]);
+    MPI_Win_free(&win);
+    MPI_Finalize();
 
-MPI_Win_free(&win);
-MPI_Finalize();
-
-return 0;
+    return 0;
 }

@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma read","rma atomic write"],
-    "RACE_PAIR": ["shmem_int_get@42","shmem_int_atomic_set@49"],
+    "RACE_PAIR": ["shmem_int_get@41","shmem_int_atomic_set@48"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations get and atomicset executed concurrently which leads to a race."
 }
@@ -17,7 +17,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 3
 

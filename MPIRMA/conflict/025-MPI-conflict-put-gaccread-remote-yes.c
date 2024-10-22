@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","rma atomic read"],
-    "RACE_PAIR": ["MPI_Put@57","MPI_Get_accumulate@63"],
+    "RACE_PAIR": ["MPI_Put@56","MPI_Get_accumulate@62"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations put and gaccread executed concurrently which leads to a race."
 }
@@ -16,11 +16,10 @@
 // RACE LABELS END
 // RACE_KIND: remote
 // ACCESS_SET: [rma write,rma atomic read]
-// RACE_PAIR: [MPI_Put@57,MPI_Get_accumulate@63]
+// RACE_PAIR: [MPI_Put@56,MPI_Get_accumulate@62]
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 3
 #define WIN_SIZE 10
@@ -54,7 +53,7 @@ int main(int argc, char** argv)
     if (rank == 0) {
         /* conflicting put and gaccread */
         // CONFLICT
-        MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Put(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
     }
 
     if (rank == 2) {

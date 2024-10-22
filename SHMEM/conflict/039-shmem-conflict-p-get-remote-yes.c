@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","rma read"],
-    "RACE_PAIR": ["shmem_int_p@42","shmem_int_get@49"],
+    "RACE_PAIR": ["shmem_int_p@41","shmem_int_get@48"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations p and get executed concurrently which leads to a race."
 }
@@ -17,7 +17,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 3
 

@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma atomic write","store"],
-    "RACE_PAIR": ["MPI_Get_accumulate@57","STORE@62"],
+    "RACE_PAIR": ["MPI_Get_accumulate@56","STORE@61"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations gacc and store executed concurrently which leads to a race."
 }
@@ -16,11 +16,10 @@
 // RACE LABELS END
 // RACE_KIND: remote
 // ACCESS_SET: [rma atomic write,store]
-// RACE_PAIR: [MPI_Get_accumulate@57,STORE@62]
+// RACE_PAIR: [MPI_Get_accumulate@56,STORE@61]
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10

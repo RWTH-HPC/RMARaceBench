@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
-    "RACE_PAIR": ["shmem_put_nbi@43","LOAD@56"],
+    "RACE_PAIR": ["shmem_put_nbi@42","LOAD@55"],
     "CONSISTENCY_CALLS": ["shmem_quiet"],
     "SYNC_CALLS": ["shmem_sync_all"],
     "NPROCS": 2,
@@ -19,7 +19,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 

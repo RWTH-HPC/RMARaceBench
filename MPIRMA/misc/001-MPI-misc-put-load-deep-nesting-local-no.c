@@ -18,7 +18,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 __attribute__((noinline)) void deeeeeeeeep(int* buf, MPI_Win win) { MPI_Put(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win); }
 
@@ -33,7 +32,7 @@ __attribute__((noinline)) void deep(int* buf, MPI_Win win) { deeep(buf, win); }
 void rank0(int* buf, MPI_Win win)
 {
     deep(buf, win);
-    printf("value is %d\n", *buf);
+    printf("*buf is %d\n", *buf);
 }
 
 #define PROC_NUM 2

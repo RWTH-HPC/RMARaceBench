@@ -18,7 +18,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -50,7 +49,7 @@ int main(int argc, char** argv)
     MPI_Win_fence(0, win);
     if (rank == 0) {
         MPI_Accumulate(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, MPI_SUM, win);
-        printf("value is %d\n", *buf);
+        printf("value is %d\n", value);
     }
     MPI_Win_fence(0, win);
 

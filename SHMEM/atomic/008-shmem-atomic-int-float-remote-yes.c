@@ -9,7 +9,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma atomic write","rma atomic write"],
-    "RACE_PAIR": ["shmem_int_atomic_add@43","shmem_int_atomic_add@48"],
+    "RACE_PAIR": ["shmem_int_atomic_add@42","shmem_int_atomic_add@47"],
     "CONSISTENCY_CALLS": ["shmem_barrier_all"],
     "SYNC_CALLS": ["shmem_barrier_all"],
     "NPROCS": 3,
@@ -20,7 +20,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 3
 

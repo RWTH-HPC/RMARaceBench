@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma atomic write","store"],
-    "RACE_PAIR": ["shmem_int_compare_swap_nbi@42","STORE@47"],
+    "RACE_PAIR": ["shmem_int_compare_swap_nbi@41","STORE@46"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations atomiccompareswapnbi and store executed concurrently which leads to a race."
 }
@@ -17,7 +17,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 

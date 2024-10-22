@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Get@64","LOAD@66"],
+    "RACE_PAIR": ["MPI_Get@63","LOAD@65"],
     "NPROCS": 2,
     "CONSISTENCY_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
     "SYNC_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
@@ -19,7 +19,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10

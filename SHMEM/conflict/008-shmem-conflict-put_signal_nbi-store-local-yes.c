@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer read","store"],
-    "RACE_PAIR": ["shmem_int_put_signal_nbi@43","STORE@45"],
+    "RACE_PAIR": ["shmem_int_put_signal_nbi@42","STORE@44"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations put_signal_nbi and store executed concurrently which leads to a race."
 }
@@ -17,7 +17,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 

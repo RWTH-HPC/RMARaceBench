@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
-    "RACE_PAIR": ["shmem_put_nbi@60","LOAD@80"],
+    "RACE_PAIR": ["shmem_put_nbi@59","LOAD@79"],
     "CONSISTENCY_CALLS": ["shmem_quiet"],
     "SYNC_CALLS": ["shmem_sync_all"],
     "NPROCS": 2,
@@ -19,7 +19,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
 void my_signal(int* s)

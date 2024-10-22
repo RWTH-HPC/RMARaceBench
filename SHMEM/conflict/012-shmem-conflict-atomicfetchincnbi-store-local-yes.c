@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","store"],
-    "RACE_PAIR": ["shmem_int_atomic_fetch_inc_nbi@42","STORE@44"],
+    "RACE_PAIR": ["shmem_int_atomic_fetch_inc_nbi@41","STORE@43"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations atomicfetchincnbi and store executed concurrently which leads to a race."
 }
@@ -17,7 +17,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 

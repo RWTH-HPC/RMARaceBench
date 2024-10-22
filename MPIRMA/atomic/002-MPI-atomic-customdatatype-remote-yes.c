@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma atomic write","rma atomic write"],
-    "RACE_PAIR": ["MPI_Accumulate@61","MPI_Accumulate@67"],
+    "RACE_PAIR": ["MPI_Accumulate@60","MPI_Accumulate@66"],
     "NPROCS": 3,
     "CONSISTENCY_CALLS": ["MPI_Win_fence"],
     "SYNC_CALLS": ["MPI_Barrier", "MPI_Win_fence"],
@@ -19,7 +19,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 3
 #define WIN_SIZE 10

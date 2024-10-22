@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["shmem_int_get@47","LOAD@49"],
+    "RACE_PAIR": ["shmem_int_get@46","LOAD@48"],
     "NPROCS": 2,
     "CONSISTENCY_CALLS": ["shmem_quiet"],
     "SYNC_CALLS": ["shmem_barrier_all"],
@@ -19,7 +19,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 

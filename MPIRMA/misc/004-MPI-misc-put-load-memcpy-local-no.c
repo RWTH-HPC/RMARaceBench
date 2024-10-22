@@ -18,7 +18,7 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 
     if (rank == 0) {
         MPI_Put(buf_alias, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
-        printf("value is %d\n", *buf_alias);
+        printf("*buf_alias is %d\n", *buf_alias);
     }
 
     MPI_Win_fence(0, win);

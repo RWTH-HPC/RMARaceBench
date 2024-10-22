@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Compare_and_swap@55","LOAD@57"],
+    "RACE_PAIR": ["MPI_Compare_and_swap@54","LOAD@56"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations cas and load executed concurrently which leads to a race."
 }
@@ -16,11 +16,10 @@
 // RACE LABELS END
 // RACE_KIND: local
 // ACCESS_SET: [local buffer write,load]
-// RACE_PAIR: [MPI_Compare_and_swap@55,LOAD@57]
+// RACE_PAIR: [MPI_Compare_and_swap@54,LOAD@56]
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
@@ -54,7 +53,7 @@ int main(int argc, char** argv)
         // CONFLICT
         MPI_Compare_and_swap(&value2, &win_base[0], &value, MPI_INT, 1, 0, win);
         // CONFLICT
-        printf("value is %d\n", *buf);
+        printf("value is %d\n", value);
     }
     MPI_Win_fence(0, win);
 

@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","load"],
-    "RACE_PAIR": ["MPI_Put@79","LOAD@99"],
+    "RACE_PAIR": ["MPI_Put@78","LOAD@98"],
     "CONSISTENCY_CALLS": ["MPI_Win_lock","MPI_Win_unlock"],
     "SYNC_CALLS": ["MPI_Barrier"],
     "NPROCS": 2,
@@ -19,7 +19,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
 void my_signal(int* s)

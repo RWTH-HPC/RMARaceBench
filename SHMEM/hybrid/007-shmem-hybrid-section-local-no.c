@@ -17,7 +17,6 @@
 
 #include <shmem.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 
@@ -42,28 +41,29 @@ int main(int argc, char** argv)
 #pragma omp sections
             {
 #pragma omp section
-                {shmem_get_nbi(&localbuf, &remote, 1, 1);
-            shmem_quiet();
-        }
-    }
+                {
+                    shmem_get_nbi(&localbuf, &remote, 1, 1);
+                    shmem_quiet();
+                }
+            }
 
 #pragma omp sections
-    {
+            {
 #pragma omp section
-        printf("localbuf is %d\n", localbuf);
+                printf("localbuf is %d\n", localbuf);
+            }
+        }
+        shmem_sync_all();
     }
-}
-shmem_sync_all();
-}
 
-if (my_pe == 1) {
-    shmem_sync_all();
-    printf("remote is %d\n", remote);
-}
+    if (my_pe == 1) {
+        shmem_sync_all();
+        printf("remote is %d\n", remote);
+    }
 
-shmem_barrier_all();
-printf("Process %d: Execution finished, variable contents: remote = %d, localbuf = %d\n", my_pe, remote, localbuf);
-shmem_finalize();
+    shmem_barrier_all();
+    printf("Process %d: Execution finished, variable contents: remote = %d, localbuf = %d\n", my_pe, remote, localbuf);
+    shmem_finalize();
 
-return 0;
+    return 0;
 }

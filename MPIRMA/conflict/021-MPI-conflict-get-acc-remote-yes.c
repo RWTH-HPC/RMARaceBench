@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma read","rma atomic write"],
-    "RACE_PAIR": ["MPI_Get@57","MPI_Accumulate@63"],
+    "RACE_PAIR": ["MPI_Get@56","MPI_Accumulate@62"],
     "NPROCS": 3,
     "DESCRIPTION": "Two conflicting operations get and acc executed concurrently which leads to a race."
 }
@@ -16,11 +16,10 @@
 // RACE LABELS END
 // RACE_KIND: remote
 // ACCESS_SET: [rma read,rma atomic write]
-// RACE_PAIR: [MPI_Get@57,MPI_Accumulate@63]
+// RACE_PAIR: [MPI_Get@56,MPI_Accumulate@62]
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 3
 #define WIN_SIZE 10
@@ -54,7 +53,7 @@ int main(int argc, char** argv)
     if (rank == 0) {
         /* conflicting get and acc */
         // CONFLICT
-        MPI_Get(buf, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
+        MPI_Get(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
     }
 
     if (rank == 2) {

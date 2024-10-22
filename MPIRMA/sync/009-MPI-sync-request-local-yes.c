@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Rget@71","LOAD@73"],
+    "RACE_PAIR": ["MPI_Rget@70","LOAD@72"],
     "NPROCS": 2,
     "DESCRIPTION": "Two conflicting operations rget and load executed concurrently which leads to a race."
 }
@@ -16,13 +16,13 @@
 // RACE LABELS END
 // RACE_KIND: local
 // ACCESS_SET: [local buffer write,load]
-// RACE_PAIR: [MPI_Rget@71,LOAD@73]
+// RACE_PAIR: [MPI_Rget@70,LOAD@72]
 // RACE LABELS BEGIN
 /*
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["MPI_Rget@71","LOAD@73"],
+    "RACE_PAIR": ["MPI_Rget@70","LOAD@72"],
     "NPROCS": 2,
     "CONSISTENCY_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
     "SYNC_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
@@ -33,7 +33,6 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PROC_NUM 2
 #define WIN_SIZE 10
