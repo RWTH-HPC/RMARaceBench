@@ -39,7 +39,6 @@ int main(int argc, char** argv)
     shmem_barrier_all();
 
     if (my_pe == 0) {
-        int source = 1;
 
         shmem_int_get_nbi(&localbuf, &remote, 1, 1);
         shmem_quiet();

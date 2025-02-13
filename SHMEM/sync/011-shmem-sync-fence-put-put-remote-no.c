@@ -39,7 +39,6 @@ int main(int argc, char** argv)
     shmem_barrier_all();
 
     if (my_pe == 0) {
-        int source = 0;
         shmem_int_put(&remote, &localbuf, 1, 1);
 
         shmem_fence(); // Orders both "RMA stores"

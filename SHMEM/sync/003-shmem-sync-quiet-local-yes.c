@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "local",
     "ACCESS_SET": ["local buffer write","load"],
-    "RACE_PAIR": ["shmem_int_get@46","LOAD@48"],
+    "RACE_PAIR": ["shmem_int_get@45","LOAD@47"],
     "NPROCS": 2,
     "CONSISTENCY_CALLS": ["shmem_quiet"],
     "SYNC_CALLS": ["shmem_barrier_all"],
@@ -40,7 +40,6 @@ int main(int argc, char** argv)
     shmem_barrier_all();
 
     if (my_pe == 0) {
-        int source = 1;
 
         // CONFLICT
         shmem_int_get_nbi(&localbuf, &remote, 1, 1);
