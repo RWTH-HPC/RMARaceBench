@@ -1,0 +1,39 @@
+{% extends "templates/GASPI/GASPI-boilerplate.c.j2" %}
+
+{%- block race_labels %}
+// RACE LABELS BEGIN
+/*
+{
+    "RACE_KIND": "none",
+    "ACCESS_SET": ["local buffer read","store"],
+    "CONSISTENCY_CALLS": ["gaspi_notify_waitsome"],
+    "SYNC_CALLS": ["gaspi_notify_waitsome"],
+    "NPROCS": 2,
+    "DESCRIPTION": "Notified write that is completed locally through notifications between rank 0 and rank 1."
+}
+*/
+// RACE LABELS END
+{%- endblock race_labels %}
+{% block preamble %}
+{% endblock preamble %}
+
+
+{% block main %}
+
+    if (rank == 0) {
+        *localbuf = 42;
+        gaspi_write_notify(loc_seg_id, 0, 1, remote_seg_id, 0, sizeof(int), 0, 1, queue_id, GASPI_BLOCK);
+        gaspi_notification_id_t firstId;
+        gaspi_notify_waitsome(remote_seg_id, 0, 1, &firstId, GASPI_BLOCK);
+        *localbuf = 1337;
+    }
+
+    if (rank == 1) {
+        gaspi_notification_id_t firstId;
+        gaspi_notify_waitsome(remote_seg_id, 0, 1, &firstId, GASPI_BLOCK);
+        gaspi_notify(remote_seg_id, 0, 0, 1, queue_id, GASPI_BLOCK);
+    }
+
+  gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
+
+{% endblock main %}

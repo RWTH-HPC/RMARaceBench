@@ -556,8 +556,10 @@ def gen_sync_races():
     Model.SHMEM: 
     [
         SourceTemplate("templates/SHMEM/sync/shmem-sync-barrierall-local-race.c.j2", 2, [True, False], shmem_get_load),
-        SourceTemplate("templates/SHMEM/sync/shmem-sync-barrierall-remote-race.c.j2", 2, [True, False], shmem_remote_conflict),
         SourceTemplate("templates/SHMEM/sync/shmem-sync-quiet-local-race.c.j2", 2, [True, False], shmem_get_load),
+        SourceTemplate("templates/SHMEM/sync/shmem-sync-waituntil-local-no.c.j2", 2, [False], shmem_get_load),
+        SourceTemplate("templates/SHMEM/sync/shmem-sync-waituntil-local-yes.c.j2", 2, [True], shmem_get_load),
+        SourceTemplate("templates/SHMEM/sync/shmem-sync-barrierall-remote-race.c.j2", 2, [True, False], shmem_remote_conflict),
         SourceTemplate("templates/SHMEM/sync/shmem-sync-quiet-sync-remote-no.c.j2", 2, [False], shmem_remote_conflict),
         SourceTemplate("templates/SHMEM/sync/shmem-sync-quiet-sync-remote-yes.c.j2", 2, [True], shmem_remote_conflict),
         SourceTemplate("templates/SHMEM/sync/shmem-sync-fence-put-put-remote-no.c.j2", 2, [False], [(om.get(Model.SHMEM, 'put'), om.get(Model.SHMEM, 'put_remote'))]),
@@ -579,6 +581,8 @@ def gen_sync_races():
     [
         SourceTemplate("templates/GASPI/sync/GASPI-sync-wait-local-yes.c.j2", 2, [True], dummy),
         SourceTemplate("templates/GASPI/sync/GASPI-sync-wait-local-no.c.j2", 2, [False], dummy),
+        SourceTemplate("templates/GASPI/sync/GASPI-sync-notify-waitsome-local-yes.c.j2", 2, [True], dummy),
+        SourceTemplate("templates/GASPI/sync/GASPI-sync-notify-waitsome-local-no.c.j2", 2, [False], dummy),
         SourceTemplate("templates/GASPI/sync/GASPI-sync-wait-barrier-remote-no.c.j2", 2, [False], dummy),
         SourceTemplate("templates/GASPI/sync/GASPI-sync-wait-barrier-remote-nonconsistent-yes.c.j2", 2, [True], dummy),
         SourceTemplate("templates/GASPI/sync/GASPI-sync-wait-barrier-remote-yes.c.j2", 2, [True], dummy),
