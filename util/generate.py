@@ -439,8 +439,6 @@ def render_template(template_file: str, number: int, model: Model, op1: Operatio
     print(f"Generated test case {filename}.")
 
 def gen_misc_races():
-    # Currently, only MPIRMA test cases generated
-
     local_race_combinations = [
         (op_local_buffer_read, op_local_load, False),
         (op_local_buffer_write, op_local_load, True),
@@ -493,18 +491,18 @@ def gen_misc_races():
             ],
     }
 
-    for (ops1, ops2, has_race) in local_race_combinations:
-        for model in Model:
-            for op1 in ops1[model]:
-                for op2 in ops2[model]:
-                    for template in local_src_templates[model]:
+    for model in Model:
+        for template in local_src_templates[model]:
+            for (ops1, ops2, has_race) in local_race_combinations:
+                for op1 in ops1[model]:
+                    for op2 in ops2[model]:
                         render_template(template.filename, caseCounters['misc'].inc_get(model, has_race), model, op1, op2, has_race, template.nprocs)
 
-    for (ops1, ops2, has_race, nprocs) in remote_race_combinations:
-        for model in Model:
-            for op1 in ops1[model]:
-                for op2 in ops2[model]:
-                    for template in remote_src_templates[model]:
+    for model in Model:
+        for template in remote_src_templates[model]:
+            for (ops1, ops2, has_race, nprocs) in remote_race_combinations:
+                for op1 in ops1[model]:
+                    for op2 in ops2[model]:
                         render_template(template.filename, caseCounters['misc'].inc_get(model, has_race), model, op1, op2, has_race, nprocs)
 
 
