@@ -35,6 +35,4 @@ __attribute__((noinline)) int* aliasgenerator(int** x) {
         {{ replace_with_aliases(op2) }}
     }
 
-    shmem_barrier_all();
-
 {% endblock main %}

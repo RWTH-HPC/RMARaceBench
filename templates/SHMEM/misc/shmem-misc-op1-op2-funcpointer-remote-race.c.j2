@@ -37,6 +37,4 @@ void rank1(int* rem_ptr, int* lbuf_ptr) {
     }
     (*rankfunc)(rem_ptr, lbuf_ptr);
 
-    shmem_barrier_all();
-
 {% endblock main %}

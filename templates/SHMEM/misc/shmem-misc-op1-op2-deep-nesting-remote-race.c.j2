@@ -41,6 +41,5 @@ void rank0(int* rem_ptr, int* lbuf_ptr) {
         {%- endif %}
         {{ replace_with_buffers(op2)}}
     }
-    shmem_barrier_all();
 
 {% endblock main %}
