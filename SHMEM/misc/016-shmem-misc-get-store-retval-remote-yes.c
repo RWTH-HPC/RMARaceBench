@@ -6,10 +6,11 @@
 // RACE LABELS BEGIN
 /*
 {
-    "RACE_KIND": "none",
-    "ACCESS_SET": ["rma read","load"],
+    "RACE_KIND": "remote",
+    "ACCESS_SET": ["rma read","store"],
+    "RACE_PAIR": ["shmem_int_get@53","STORE@56"],
     "NPROCS": 2,
-    "DESCRIPTION": "Two non-conflicting operations get and load executed concurrently with no race."
+    "DESCRIPTION": "Two conflicting operations get and store executed concurrently which leads to a race."
 }
 */
 // RACE LABELS END
@@ -17,7 +18,7 @@
 #include <shmem.h>
 #include <stdio.h>
 
-__attribute__((noinline)) void aliasgenerator(int** x, int** y) { *y = *x; }
+__attribute__((noinline)) int* aliasgenerator(int** x) { return *x; }
 
 #define PROC_NUM 2
 
@@ -43,16 +44,17 @@ int main(int argc, char** argv)
     int* rem_ptr_alias;
     int* lbuf_ptr_alias;
 
-    aliasgenerator(&rem_ptr, &rem_ptr_alias);
-    aliasgenerator(&lbuf_ptr, &lbuf_ptr_alias);
+    rem_ptr_alias = aliasgenerator(&rem_ptr);
+    lbuf_ptr_alias = aliasgenerator(&lbuf_ptr);
 
     if (my_pe == 0) {
+        /* conflicting get and store */
+        // CONFLICT
         shmem_int_get(lbuf_ptr, rem_ptr, 1, 1);
     } else {
-        printf("*rem_ptr_alias is %d", *rem_ptr_alias);
+        // CONFLICT
+        *rem_ptr_alias = 42;
     }
-
-    shmem_barrier_all();
 
     shmem_barrier_all();
     printf("Process %d: Execution finished, variable contents: remote = %d, localbuf = %d\n", my_pe, remote, localbuf);

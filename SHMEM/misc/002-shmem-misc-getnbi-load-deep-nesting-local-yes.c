@@ -64,7 +64,6 @@ int main(int argc, char** argv)
     if (my_pe == 0) {
         rank0(rem_ptr, lbuf_ptr);
     }
-    shmem_barrier_all();
 
     shmem_barrier_all();
     printf("Process %d: Execution finished, variable contents: remote = %d, localbuf = %d\n", my_pe, remote, localbuf);

@@ -17,7 +17,9 @@
 #include <shmem.h>
 #include <stdio.h>
 
-__attribute__((noinline)) int* aliasgenerator(int** x) { return *x; }
+void rank0(int* rem_ptr, int* lbuf_ptr) { shmem_int_get(lbuf_ptr, rem_ptr, 1, 1); }
+
+void rank1(int* rem_ptr, int* lbuf_ptr) { printf("*rem_ptr is %d", *rem_ptr); }
 
 #define PROC_NUM 2
 
@@ -35,24 +37,19 @@ int main(int argc, char** argv)
         printf("Got %d PEs, expected %d\n", num_pe, PROC_NUM);
         shmem_global_exit(1);
     }
-
-    shmem_barrier_all();
-
     int* rem_ptr = &remote;
     int* lbuf_ptr = &localbuf;
-    int* rem_ptr_alias;
-    int* lbuf_ptr_alias;
 
-    rem_ptr_alias = aliasgenerator(&rem_ptr);
-    lbuf_ptr_alias = aliasgenerator(&lbuf_ptr);
-
-    if (my_pe == 0) {
-        shmem_int_get(lbuf_ptr, rem_ptr, 1, 1);
-    } else {
-        printf("*rem_ptr_alias is %d", *rem_ptr_alias);
-    }
+    void (*rankfunc)(int* rem_ptr, int* lbuf_ptr);
 
     shmem_barrier_all();
+
+    if (my_pe == 0) {
+        rankfunc = rank0;
+    } else {
+        rankfunc = rank1;
+    }
+    (*rankfunc)(rem_ptr, lbuf_ptr);
 
     shmem_barrier_all();
     printf("Process %d: Execution finished, variable contents: remote = %d, localbuf = %d\n", my_pe, remote, localbuf);

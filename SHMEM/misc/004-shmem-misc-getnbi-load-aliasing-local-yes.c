@@ -6,17 +6,19 @@
 // RACE LABELS BEGIN
 /*
 {
-    "RACE_KIND": "none",
-    "ACCESS_SET": ["local buffer read","load"],
+    "RACE_KIND": "local",
+    "ACCESS_SET": ["local buffer write","load"],
+    "RACE_PAIR": ["shmem_int_get_nbi@53","LOAD@55"],
     "NPROCS": 2,
-    "DESCRIPTION": "Two non-conflicting operations putnbi and load executed concurrently with no race."
+    "DESCRIPTION": "Two conflicting operations getnbi and load executed concurrently which leads to a race."
 }
 */
 // RACE LABELS END
 
 #include <shmem.h>
 #include <stdio.h>
-#include <string.h>
+
+__attribute__((noinline)) void aliasgenerator(int** x, int** y) { *y = *x; }
 
 #define PROC_NUM 2
 
@@ -42,15 +44,16 @@ int main(int argc, char** argv)
     int* rem_ptr_alias;
     int* lbuf_ptr_alias;
 
-    memcpy(&rem_ptr_alias, &rem_ptr, sizeof(int*));
-    memcpy(&lbuf_ptr_alias, &lbuf_ptr, sizeof(int*));
+    aliasgenerator(&rem_ptr, &rem_ptr_alias);
+    aliasgenerator(&lbuf_ptr, &lbuf_ptr_alias);
 
     if (my_pe == 0) {
-        shmem_int_put_nbi(rem_ptr, lbuf_ptr, 1, 1);
+        /* conflicting getnbi and load */
+        // CONFLICT
+        shmem_int_get_nbi(lbuf_ptr, rem_ptr, 1, 1);
+        // CONFLICT
         printf("*lbuf_ptr_alias is %d\n", *lbuf_ptr_alias);
     }
-
-    shmem_barrier_all();
 
     shmem_barrier_all();
     printf("Process %d: Execution finished, variable contents: remote = %d, localbuf = %d\n", my_pe, remote, localbuf);

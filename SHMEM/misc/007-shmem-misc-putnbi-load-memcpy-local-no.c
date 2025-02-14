@@ -7,9 +7,9 @@
 /*
 {
     "RACE_KIND": "none",
-    "ACCESS_SET": ["rma read","load"],
+    "ACCESS_SET": ["local buffer read","load"],
     "NPROCS": 2,
-    "DESCRIPTION": "Two non-conflicting operations get and load executed concurrently with no race."
+    "DESCRIPTION": "Two non-conflicting operations putnbi and load executed concurrently with no race."
 }
 */
 // RACE LABELS END
@@ -46,12 +46,9 @@ int main(int argc, char** argv)
     memcpy(&lbuf_ptr_alias, &lbuf_ptr, sizeof(int*));
 
     if (my_pe == 0) {
-        shmem_int_get(lbuf_ptr, rem_ptr, 1, 1);
-    } else {
-        printf("*rem_ptr_alias is %d", *rem_ptr_alias);
+        shmem_int_put_nbi(rem_ptr, lbuf_ptr, 1, 1);
+        printf("*lbuf_ptr_alias is %d\n", *lbuf_ptr_alias);
     }
-
-    shmem_barrier_all();
 
     shmem_barrier_all();
     printf("Process %d: Execution finished, variable contents: remote = %d, localbuf = %d\n", my_pe, remote, localbuf);

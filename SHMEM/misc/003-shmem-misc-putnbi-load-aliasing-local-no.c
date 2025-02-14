@@ -52,8 +52,6 @@ int main(int argc, char** argv)
     }
 
     shmem_barrier_all();
-
-    shmem_barrier_all();
     printf("Process %d: Execution finished, variable contents: remote = %d, localbuf = %d\n", my_pe, remote, localbuf);
     shmem_finalize();
 
