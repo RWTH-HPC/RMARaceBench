@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.0 - (2025-02-25)
+
+* Add `misc` tests also for SHMEM and GASPI
+* Add test cases for local completion via notifications
+* `misc` tests: Revert buf usage to &value usage and use manual replacements in misc category to make alias tests work
+* `misc` tests: Remove the number of redundant tests
+* `misc` tests: Rearrange order of tests
+* Fix shared memory data races in GASPI hybrid test cases (OpenMP master, single)
+* SHMEM: Remove obsolete variables
+* SHMEM: Remove unnecessary barrier in misc testcases
+* MPI RMA: Ensure that MPI groups in PSCW are freed to avoid resource leak
+* GASPI: Use MPI_Init_thread in hybrid test cases
+* Update jinja2 dependency
+
+
 ## 1.1.0 - (2024-06-14)
 
 * Add new category 'misc' that adds test cases challenging for static tools
