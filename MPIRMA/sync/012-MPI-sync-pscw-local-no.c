@@ -59,6 +59,7 @@ int main(int argc, char** argv)
         MPI_Win_start(destgroup, 0, win);
         MPI_Get(&value, 1, MPI_INT, 1, 0, 1, MPI_INT, win);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
         printf("value is %d\n", value);
     } else {
         const int srcrank = 0;
@@ -66,6 +67,7 @@ int main(int argc, char** argv)
         MPI_Group_incl(world_group, 1, &srcrank, &srcgroup);
         MPI_Win_post(srcgroup, 0, win);
         MPI_Win_wait(win);
+        MPI_Group_free(&srcgroup);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);

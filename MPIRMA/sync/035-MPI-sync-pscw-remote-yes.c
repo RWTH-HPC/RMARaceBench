@@ -8,7 +8,7 @@
 {
     "RACE_KIND": "remote",
     "ACCESS_SET": ["rma write","rma read"],
-    "RACE_PAIR": ["MPI_Put@67","MPI_Get@76"],
+    "RACE_PAIR": ["MPI_Put@67","MPI_Get@77"],
     "NPROCS": 3,
     "CONSISTENCY_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
     "SYNC_CALLS": ["MPI_Win_start,MPI_Win_complete,MPI_Win_post,MPI_Win_wait"],
@@ -66,6 +66,7 @@ int main(int argc, char** argv)
         // CONFLICT
         MPI_Put(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
     } else if (rank == 1) {
         int destrank = 2;
         MPI_Group destgroup;
@@ -75,6 +76,7 @@ int main(int argc, char** argv)
         // CONFLICT
         MPI_Get(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
 
     } else if (rank == 2) {
         const int srcrank[2] = {0, 1};
@@ -83,6 +85,7 @@ int main(int argc, char** argv)
 
         MPI_Win_post(srcgroup, 0, win);
         MPI_Win_wait(win);
+        MPI_Group_free(&srcgroup);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);

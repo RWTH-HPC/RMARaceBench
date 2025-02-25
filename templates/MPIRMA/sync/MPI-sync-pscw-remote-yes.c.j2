@@ -37,6 +37,7 @@
 // CONFLICT
         MPI_Put(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
     }
     else if (rank == 1) {
         int destrank = 2;
@@ -47,6 +48,7 @@
 // CONFLICT
         MPI_Get(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
 
     } else if (rank == 2) {
         const int srcrank[2] = {0,1};
@@ -55,6 +57,7 @@
 
         MPI_Win_post(srcgroup, 0, win);
         MPI_Win_wait(win);
+        MPI_Group_free(&srcgroup);
     }
 
     

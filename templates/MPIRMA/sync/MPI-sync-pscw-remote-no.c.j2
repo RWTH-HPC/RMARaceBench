@@ -36,6 +36,7 @@
         int value = 42;
         MPI_Put(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
     }
     else if (rank == 1) {
         int destrank = 2;
@@ -45,6 +46,7 @@
         int value;
         MPI_Get(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
 
     } else if (rank == 2) {
         int srcrank0 = 0;
@@ -60,6 +62,9 @@
 
         MPI_Win_post(srcgroup1, 0, win);
         MPI_Win_wait(win);
+
+        MPI_Group_free(&srcgroup0);
+        MPI_Group_free(&srcgroup1);
     }
 
     

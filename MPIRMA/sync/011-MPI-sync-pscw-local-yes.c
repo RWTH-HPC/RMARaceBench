@@ -64,12 +64,14 @@ int main(int argc, char** argv)
         // CONFLICT
         printf("value is %d\n", value);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
     } else {
         const int srcrank = 0;
         MPI_Group srcgroup;
         MPI_Group_incl(world_group, 1, &srcrank, &srcgroup);
         MPI_Win_post(srcgroup, 0, win);
         MPI_Win_wait(win);
+        MPI_Group_free(&srcgroup);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);

@@ -64,6 +64,7 @@ int main(int argc, char** argv)
         int value = 42;
         MPI_Put(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
     } else if (rank == 1) {
         int destrank = 2;
         MPI_Group destgroup;
@@ -72,6 +73,7 @@ int main(int argc, char** argv)
         int value;
         MPI_Get(&value, 1, MPI_INT, 2, 0, 1, MPI_INT, win);
         MPI_Win_complete(win);
+        MPI_Group_free(&destgroup);
 
     } else if (rank == 2) {
         int srcrank0 = 0;
@@ -87,6 +89,9 @@ int main(int argc, char** argv)
 
         MPI_Win_post(srcgroup1, 0, win);
         MPI_Win_wait(win);
+
+        MPI_Group_free(&srcgroup0);
+        MPI_Group_free(&srcgroup1);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
