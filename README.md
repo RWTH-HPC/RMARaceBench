@@ -1,4 +1,4 @@
-# RMARaceBench 1.1.0 - [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+# RMARaceBench 1.2.0 - [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 RMARaceBench [[RRB23](#reference)] is a collection of race test cases for MPI RMA, SHMEM, and GASPI to evaluate the classification quality of race detection tools for RMA programs.
 
 Authors: Simon Schwitanski, Sven Klotz, Joachim Jenke, Matthias S. Müller, RWTH Aachen University
