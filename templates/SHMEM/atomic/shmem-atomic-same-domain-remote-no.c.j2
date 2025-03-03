@@ -34,5 +34,7 @@
     }
 
     shmem_barrier_all();
-
+    shmem_ctx_destroy(ctx);
+    shmem_ctx_destroy(ctx2);
+    
 {% endblock main %}

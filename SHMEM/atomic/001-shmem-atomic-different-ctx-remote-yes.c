@@ -56,6 +56,8 @@ int main(int argc, char** argv)
             shmem_team_translate_pe(SHMEM_TEAM_WORLD, 1, SHMEM_TEAM_SHARED));
     }
 
+    shmem_ctx_destroy(ctx_world);
+    shmem_ctx_destroy(ctx_shared);
     shmem_barrier_all();
 
     shmem_barrier_all();

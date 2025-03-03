@@ -38,7 +38,6 @@
     }
 
     shmem_barrier_all();
-
-    printf( "PE %d: %d\n", my_pe, remote );
+    shmem_ctx_destroy(ctx);
 
 {% endblock main %}
