@@ -32,8 +32,4 @@
         shmem_int_put( &remote, &localbuf2, 1, 1 );
     }
 
-    shmem_barrier_all();
-
-    printf( "PE %d: localbuf = %d, remote = %d, \n", my_pe, localbuf, remote );
-
 {% endblock main %}

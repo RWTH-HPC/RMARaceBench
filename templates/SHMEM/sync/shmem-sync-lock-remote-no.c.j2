@@ -34,8 +34,4 @@
         shmem_clear_lock( &lock );
     }
 
-    shmem_barrier_all();
-
-    printf( "PE %d: localbuf = %d, remote = %d, \n", my_pe, localbuf, remote );
-
 {% endblock %}
